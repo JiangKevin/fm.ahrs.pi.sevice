@@ -217,6 +217,14 @@ int main()
             index           = 0;
             server.commond_ = "";
         }
+        else if ( server.commond_ == "Reset" )
+        {
+            init_sensor( sensor_mmc_, sensor_imu_ );
+        }
+        else if ( server.commond_ == "Clear" )
+        {
+            system( "clear" );
+        }
     }
     //
     server.stop();
