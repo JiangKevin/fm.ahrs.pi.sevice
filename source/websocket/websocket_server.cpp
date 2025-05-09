@@ -106,7 +106,7 @@ void WebSocketServer::handleSend( std::string message )
         {
             try
             {
-                printf( "Send message is %s \n", message.c_str() );
+                // printf( "Send message is %s \n", message.c_str() );
                 net_ptr.connection_->write( net::buffer( message ) );
             }
             catch ( ... )
