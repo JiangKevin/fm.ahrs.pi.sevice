@@ -27,23 +27,24 @@ class WebSocketServer
 public:
     WebSocketServer();
     ~WebSocketServer();
-    void setPort( const std::string& port);
+    void setPort( const std::string& port );
     void start();
     void stop();
 private:
     void acceptConnections();
     void handleReceive( websocket::stream< tcp::socket >& ws );
-    void handleSend( std::string message );
 
-    std::string            port_;
-    net::io_context        ioc_;
-    tcp::acceptor          acceptor_;
-    std::thread            serverThread_;
-    bool                   running_;
+    std::string     port_;
+    net::io_context ioc_;
+    tcp::acceptor   acceptor_;
+    std::thread     serverThread_;
     std::vector< NET_PTR > net_ptrs_;
     std::mutex             connectionsMutex_;
 public:
-
+    void handleSend( std::string message );
+public:
+    std::string commond_;
+    bool        running_;
 };
 
 #endif

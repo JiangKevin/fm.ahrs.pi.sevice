@@ -1,5 +1,4 @@
 #include "websocket_server.hpp"
-#include <Urho3D/IO/Log.h>
 #include <chrono>
 #include <iostream>
 //
@@ -28,7 +27,11 @@ void WebSocketServer::start()
     {
         running_ = true;
         //
-        acceptConnections();
+        serverThread_ = std::thread(
+            [ this ]()
+            {
+                acceptConnections();
+            } );
     }
 }
 //
@@ -56,7 +59,8 @@ void WebSocketServer::acceptConnections()
                 } );
             //
             rec_thread.detach();
-
+            //
+            handleSend( "Connected" );
             //
             NET_PTR net_ptr;
             net_ptr.connection_ = ws;
@@ -80,23 +84,9 @@ void WebSocketServer::handleReceive( websocket::stream< tcp::socket >& ws )
             ws.read( buffer );
             std::string message = beast::buffers_to_string( buffer.data() );
             //
-            if ( message == "Start" )
-            {
-                std::cout << "Server received start command" << std::endl;
-                //
-                SENSOR_DB sensor_data;
-                sensor_data_queue_->enqueue( sensor_data );
-            }
-            else
-            {
-                //
-                SENSOR_DB sensor_data;
-                sensor_data.getValueFromString( message );
-                sensor_data_queue_->enqueue( sensor_data );
-            }
-
+            commond_ = message;
             //
-            // std::cout << "Server received: " << message << std::endl;
+            std::cout << "Server received: " << message << std::endl;
             buffer.consume( buffer.size() );
         }
     }
@@ -116,6 +106,7 @@ void WebSocketServer::handleSend( std::string message )
         {
             try
             {
+                printf( "Send message is %s \n", message.c_str() );
                 net_ptr.connection_->write( net::buffer( message ) );
             }
             catch ( ... )
@@ -136,6 +127,12 @@ void WebSocketServer::stop()
         running_ = false;
         ioc_.stop();
         //
+        if ( serverThread_.joinable() )
+        {
+            printf( "Server thread joined : %d\n", serverThread_.get_id() );
+            // serverThread_.join();
+        }
+        // 
         {
             std::lock_guard< std::mutex > lock( connectionsMutex_ );
             //

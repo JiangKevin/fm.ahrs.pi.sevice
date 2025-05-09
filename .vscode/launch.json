@@ -8,7 +8,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "Debug imu",
-            "program": "${workspaceFolder}/bin/ahrs_client",
+            "program": "${workspaceFolder}/bin/ahrs_sevice",
             "args": [
                 "-NW",
                 "-M"
