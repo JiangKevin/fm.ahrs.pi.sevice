@@ -61,7 +61,7 @@ void init_out_csv( rapidcsv::Document& csv_doc )
 //
 void update_out_csv( int& index, rapidcsv::Document& csv_doc, const SENSOR_DB& sensor_data )
 {
-
+    // csv_doc.
     // 添加数据行
     csv_doc.SetCell< float >( 0, index, sensor_data.time );
     csv_doc.SetCell< float >( 1, index, sensor_data.gyro_x );
@@ -219,6 +219,11 @@ int main()
         }
         else if ( server.commond_ == "Reset" )
         {
+            // 清空数据：销毁并重新创建
+            csv_doc_ = rapidcsv::Document();
+            index    = 0;
+            init_out_csv( csv_doc_ );
+            //
             ahrs_calculation_.ResetInitial();
             init_sensor( sensor_mmc_, sensor_imu_ );
             server.commond_ = "Start";

@@ -92,6 +92,7 @@ void WebSocketServer::handleReceive( websocket::stream< tcp::socket >& ws )
     }
     catch ( const std::exception& e )
     {
+        commond_ = "";
         std::cerr << "Server receive exception: " << e.what() << std::endl;
     }
 }
