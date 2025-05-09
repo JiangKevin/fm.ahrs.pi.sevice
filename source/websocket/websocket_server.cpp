@@ -120,7 +120,7 @@ void WebSocketServer::handleSend( std::string message )
 void WebSocketServer::stop()
 {
     printf( "WebSocketServer::stop()\n" );
-    handleSend( "stop" );
+    handleSend( "Stoped" );
     //
     if ( running_ )
     {
@@ -132,7 +132,7 @@ void WebSocketServer::stop()
             printf( "Server thread joined : %d\n", serverThread_.get_id() );
             // serverThread_.join();
         }
-        // 
+        //
         {
             std::lock_guard< std::mutex > lock( connectionsMutex_ );
             //

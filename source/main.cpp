@@ -213,7 +213,9 @@ int main()
         }
         else if ( server.commond_ == "Stop" )
         {
-            //
+            close_out_csv( csv_doc_ );
+            index           = 0;
+            server.commond_ = "";
         }
     }
     //
