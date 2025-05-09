@@ -219,6 +219,7 @@ int main()
         }
         else if ( server.commond_ == "Reset" )
         {
+            ahrs_calculation_.ResetInitial();
             init_sensor( sensor_mmc_, sensor_imu_ );
             server.commond_ = "Start";
         }
