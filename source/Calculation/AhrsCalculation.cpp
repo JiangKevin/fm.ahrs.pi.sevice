@@ -85,8 +85,8 @@ void AhrsCalculation::calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt
 {
     // Calculate the velocity using the trapezoidal rule
     initialVelocity.axis.x = initialVelocity.axis.x + ( sensor_data->eacc_x * dt );
-    initialVelocity.axis.y = initialVelocity.axis.y + ( sensor_data->eacc_x * dt );
-    initialVelocity.axis.z = initialVelocity.axis.z + ( sensor_data->eacc_x * dt );
+    initialVelocity.axis.y = initialVelocity.axis.y + ( sensor_data->eacc_y * dt );
+    initialVelocity.axis.z = initialVelocity.axis.z + ( sensor_data->eacc_z * dt );
     //
     sensor_data->vel_x = initialVelocity.axis.x;
     sensor_data->vel_y = initialVelocity.axis.y;
