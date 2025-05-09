@@ -211,7 +211,7 @@ int main()
                 update_out_csv( index, csv_doc_, sensor_data_ );
             }
         }
-        else if ( server.commond_ == "Stop" )
+        else if ( server.commond_ == "Pause" )
         {
             close_out_csv( csv_doc_ );
             index           = 0;
@@ -220,10 +220,17 @@ int main()
         else if ( server.commond_ == "Reset" )
         {
             init_sensor( sensor_mmc_, sensor_imu_ );
+            server.commond_ = "Start";
         }
         else if ( server.commond_ == "Clear" )
         {
             system( "clear" );
+            server.commond_ = "Start";
+        }
+        else if ( server.commond_ == "Stop" )
+        {
+            server.commond_ = "";
+            server.stop();
         }
     }
     //
