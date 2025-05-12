@@ -214,7 +214,7 @@ int main()
             auto values    = splitString( server.commond_, delimiter );
             printf( "%s", server.commond_.c_str() );
             //
-            if ( values.size() == 43 )
+            if ( values.size() == 49 )
             {
                 //
                 ahrs_calculation_.gyroscopeMisalignment = { std::stof( values[ 1 ] ), std::stof( values[ 2 ] ), std::stof( values[ 3 ] ), std::stof( values[ 4 ] ), std::stof( values[ 5 ] ), std::stof( values[ 6 ] ), std::stof( values[ 7 ] ), std::stof( values[ 8 ] ), std::stof( values[ 9 ] ) };
@@ -232,6 +232,27 @@ int main()
                 ahrs_calculation_.softIronMatrix = { std::stof( values[ 32 ] ), std::stof( values[ 33 ] ), std::stof( values[ 34 ] ), std::stof( values[ 35 ] ), std::stof( values[ 36 ] ), std::stof( values[ 37 ] ), std::stof( values[ 38 ] ), std::stof( values[ 39 ] ), std::stof( values[ 40 ] ) };
                 //
                 ahrs_calculation_.hardIronOffset = { std::stof( values[ 41 ] ), std::stof( values[ 42 ] ), std::stof( values[ 43 ] ) };
+                //
+
+                //
+                if ( std::stoi( values[ 44 ] ) == 0 )
+                {
+                    ahrs_calculation_.settings.convention = FusionConventionNwu;
+                }
+                else if ( std::stoi( values[ 44 ] ) == 1 )
+                {
+                    ahrs_calculation_.settings.convention = FusionConventionEnu;
+                }
+                else if ( std::stoi( values[ 44 ] ) == 2 )
+                {
+                    ahrs_calculation_.settings.convention = FusionConventionNed;
+                }
+                //
+                ahrs_calculation_.settings.gain                  = std::stof( values[ 45 ] );
+                ahrs_calculation_.settings.gyroscopeRange        = std::stof( values[ 46 ] );
+                ahrs_calculation_.settings.accelerationRejection = std::stof( values[ 47 ] );
+                ahrs_calculation_.settings.magneticRejection     = std::stof( values[ 48 ] );
+                ahrs_calculation_.settings.recoveryTriggerPeriod = std::stoi( values[ 49 ] ) * SAMPLE_RATE;
             }
             //
             // 清空数据：销毁并重新创建
@@ -239,6 +260,7 @@ int main()
             index    = 0;
             init_out_csv( csv_doc_ );
             //
+            ahrs_calculation_.ResetInitFusion();
             ahrs_calculation_.ResetInitial();
             init_sensor( sensor_mmc_, sensor_imu_ );
             server.commond_ = "";

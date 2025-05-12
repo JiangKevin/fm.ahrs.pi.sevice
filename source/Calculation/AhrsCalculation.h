@@ -204,7 +204,7 @@ public:
     int64_t      previousTimestamp;
     float        deltaTime;
     // Set AHRS algorithm settings
-    const FusionAhrsSettings settings = {
+    FusionAhrsSettings settings = {
         .convention            = FusionConventionNwu,
         .gain                  = 0.5f,
         .gyroscopeRange        = 2000.0f, /* replace this with actual gyroscope range in degrees/s */
@@ -215,6 +215,7 @@ public:
 public:
     void SolveAnCalculation( SENSOR_DB* sensor_data );
     void ResetInitial();
+    void ResetInitFusion();
 private:
     void calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt );
 };

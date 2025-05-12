@@ -102,7 +102,7 @@ void AhrsCalculation::calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt
     sensor_data->pos_y = initialPosition.axis.y;
     sensor_data->pos_z = initialPosition.axis.z;
 }
-// 
+//
 void AhrsCalculation::ResetInitial()
 {
     initialVelocity.axis.x = 0.0f;
@@ -112,4 +112,12 @@ void AhrsCalculation::ResetInitial()
     initialPosition.axis.x = 0.0f;
     initialPosition.axis.y = 0.0f;
     initialPosition.axis.z = 0.0f;
+}
+//
+void AhrsCalculation::ResetInitFusion()
+{
+    FusionOffsetInitialise( &offset, SAMPLE_RATE );
+    FusionAhrsInitialise( &ahrs );
+    //
+    FusionAhrsSetSettings( &ahrs, &settings );
 }
