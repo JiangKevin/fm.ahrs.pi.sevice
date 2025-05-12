@@ -212,10 +212,11 @@ int main()
         {
             char delimiter = ',';
             auto values    = splitString( server.commond_, delimiter );
-            // printf( "%s", server.commond_.c_str() );
+
             //
             if ( values.size() == 49 )
             {
+                printf( "%s\n", server.commond_.c_str() );
                 //
                 ahrs_calculation_.gyroscopeMisalignment = { std::stof( values[ 1 ] ), std::stof( values[ 2 ] ), std::stof( values[ 3 ] ), std::stof( values[ 4 ] ), std::stof( values[ 5 ] ), std::stof( values[ 6 ] ), std::stof( values[ 7 ] ), std::stof( values[ 8 ] ), std::stof( values[ 9 ] ) };
                 //
