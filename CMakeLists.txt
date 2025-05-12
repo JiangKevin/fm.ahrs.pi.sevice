@@ -7,7 +7,8 @@ project(${app_name})
 
 # 设置所有可执行文件的运行时输出目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $ENV{FmDev}/bin)
-
+# C++17 is required for this project.
+set(CMAKE_CXX_STANDARD 17)
 #
 include_directories($ENV{FmDev}/source)
 include_directories($ENV{FmDev}/source/device)

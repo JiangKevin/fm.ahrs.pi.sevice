@@ -183,16 +183,16 @@ public:
     ~AhrsCalculation(){};
 public:
     // Define calibration (replace with actual calibration data if available)
-    const FusionMatrix gyroscopeMisalignment = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-    const FusionVector gyroscopeSensitivity  = { 1.0f, 1.0f, 1.0f };
-    const FusionVector gyroscopeOffset       = { 0.0f, 0.0f, 0.0f };
+    FusionMatrix gyroscopeMisalignment = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
+    FusionVector gyroscopeSensitivity  = { 1.0f, 1.0f, 1.0f };
+    FusionVector gyroscopeOffset       = { 0.0f, 0.0f, 0.0f };
     //
-    const FusionMatrix accelerometerMisalignment = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-    const FusionVector accelerometerSensitivity  = { 1.0f, 1.0f, 1.0f };
-    const FusionVector accelerometerOffset       = { 0.0f, 0.0f, 0.025f };
+    FusionMatrix accelerometerMisalignment = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
+    FusionVector accelerometerSensitivity  = { 1.0f, 1.0f, 1.0f };
+    FusionVector accelerometerOffset       = { 0.0f, 0.0f, 0.025f };
     //
-    const FusionMatrix softIronMatrix = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-    const FusionVector hardIronOffset = { 0.0f, 0.0f, 0.0f };
+    FusionMatrix softIronMatrix = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
+    FusionVector hardIronOffset = { 0.0f, 0.0f, 0.0f };
     // 初始速度
     FusionVector initialVelocity = { 0.0f, 0.0f, 0.0f };
     // 初始位置

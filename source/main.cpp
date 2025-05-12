@@ -8,7 +8,9 @@
 #include <iostream>
 #include <rapidcsv.h>
 #include <string>
+#include <string_view>
 #include <unistd.h>
+
 //
 const std::string i2cDevice         = "/dev/i2c-1";
 uint8_t           deviceAddress_mmc = 0x30;
@@ -63,7 +65,7 @@ void update_out_csv( int& index, rapidcsv::Document& csv_doc, const SENSOR_DB& s
 {
     // csv_doc.
     // 添加数据行
-    csv_doc.SetCell< float >( 0, index, sensor_data.time );
+    csv_doc.SetCell< int64_t >( 0, index, sensor_data.time );
     csv_doc.SetCell< float >( 1, index, sensor_data.gyro_x );
     csv_doc.SetCell< float >( 2, index, sensor_data.gyro_y );
     csv_doc.SetCell< float >( 3, index, sensor_data.gyro_z );
@@ -177,6 +179,11 @@ void signalHandler_for_gloab( int signum )
     // 退出程序
     exit( signum );
 }
+//
+static bool startsWith( const std::string& str, const std::string& prefix )
+{
+    return str.size() >= prefix.size() && str.compare( 0, prefix.size(), prefix ) == 0;
+}
 
 //
 int main()
@@ -201,6 +208,42 @@ int main()
     //
     while ( server.running_ )
     {
+        if ( startsWith( server.commond_, "Setup" ) )
+        {
+            char delimiter = ',';
+            auto values    = splitString( server.commond_, delimiter );
+            printf( "%s", server.commond_.c_str() );
+            //
+            if ( values.size() == 43 )
+            {
+                //
+                ahrs_calculation_.gyroscopeMisalignment = { std::stof( values[ 1 ] ), std::stof( values[ 2 ] ), std::stof( values[ 3 ] ), std::stof( values[ 4 ] ), std::stof( values[ 5 ] ), std::stof( values[ 6 ] ), std::stof( values[ 7 ] ), std::stof( values[ 8 ] ), std::stof( values[ 9 ] ) };
+                //
+                ahrs_calculation_.gyroscopeSensitivity = { std::stof( values[ 10 ] ), std::stof( values[ 11 ] ), std::stof( values[ 13 ] ) };
+                //
+                ahrs_calculation_.gyroscopeOffset = { std::stof( values[ 14 ] ), std::stof( values[ 15 ] ), std::stof( values[ 16 ] ) };
+                //
+                ahrs_calculation_.accelerometerMisalignment = { std::stof( values[ 17 ] ), std::stof( values[ 18 ] ), std::stof( values[ 19 ] ), std::stof( values[ 20 ] ), std::stof( values[ 21 ] ),
+                                                                std::stof( values[ 22 ] ), std::stof( values[ 23 ] ), std::stof( values[ 24 ] ), std::stof( values[ 25 ] ) };
+                //
+                ahrs_calculation_.accelerometerSensitivity = { std::stof( values[ 26 ] ), std::stof( values[ 27 ] ), std::stof( values[ 28 ] ) };
+                ahrs_calculation_.accelerometerOffset      = { std::stof( values[ 29 ] ), std::stof( values[ 30 ] ), std::stof( values[ 31 ] ) };
+                //
+                ahrs_calculation_.softIronMatrix = { std::stof( values[ 32 ] ), std::stof( values[ 33 ] ), std::stof( values[ 34 ] ), std::stof( values[ 35 ] ), std::stof( values[ 36 ] ), std::stof( values[ 37 ] ), std::stof( values[ 38 ] ), std::stof( values[ 39 ] ), std::stof( values[ 40 ] ) };
+                //
+                ahrs_calculation_.hardIronOffset = { std::stof( values[ 41 ] ), std::stof( values[ 42 ] ), std::stof( values[ 43 ] ) };
+            }
+            //
+            // 清空数据：销毁并重新创建
+            csv_doc_ = rapidcsv::Document();
+            index    = 0;
+            init_out_csv( csv_doc_ );
+            //
+            ahrs_calculation_.ResetInitial();
+            init_sensor( sensor_mmc_, sensor_imu_ );
+            server.commond_ = "";
+        }
+        //
         if ( server.commond_ == "Start" )
         {
             bool ret = read_sensor_data( sensor_mmc_, sensor_imu_, ahrs_calculation_, sensor_data_ );
