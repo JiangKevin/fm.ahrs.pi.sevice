@@ -212,7 +212,7 @@ int main()
         {
             char delimiter = ',';
             auto values    = splitString( server.commond_, delimiter );
-            printf( "%s", server.commond_.c_str() );
+            // printf( "%s", server.commond_.c_str() );
             //
             if ( values.size() == 49 )
             {
