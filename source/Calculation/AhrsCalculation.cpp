@@ -5,10 +5,7 @@
 // 带 Context* 参数的构造函数实现
 AhrsCalculation::AhrsCalculation()
 {
-    FusionOffsetInitialise( &offset, SAMPLE_RATE );
-    FusionAhrsInitialise( &ahrs );
-    //
-    FusionAhrsSetSettings( &ahrs, &settings );
+    ResetInitFusion();
 }
 
 //
@@ -22,10 +19,6 @@ void AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data )
     FusionVector accelerometer = { sensor_data->acc_x, sensor_data->acc_y, sensor_data->acc_z };
     FusionVector magnetometer  = { sensor_data->mag_x, sensor_data->mag_y, sensor_data->mag_z };
 
-    // printf( "Gyroscope: %f %f %f\n", gyroscope.axis.x, gyroscope.axis.y, gyroscope.axis.z );
-    // printf( "Accelerometer: %f %f %f\n", accelerometer.axis.x, accelerometer.axis.y, accelerometer.axis.z );
-    // printf( "Magnetometer: %f %f %f\n", magnetometer.axis.x, magnetometer.axis.y, magnetometer.axis.z );
-    //
     // Apply calibration
     gyroscope     = FusionCalibrationInertial( gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset );
     accelerometer = FusionCalibrationInertial( accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset );
@@ -68,15 +61,7 @@ void AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data )
     sensor_data->eacc_z = earth.axis.z;
 
     //
-    // printf( "Quaternion: %f %f %f %f\n", sensor_data->quate_x, sensor_data->quate_y, sensor_data->quate_z, sensor_data->quate_w );
-    // printf( "Euler: %f %f %f\n", sensor_data->roll, sensor_data->pitch, sensor_data->yaw );
-    // printf( "Earth Acceleration: %f %f %f\n", sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z );
-
-    //
     calculateSurfaceVelocity( sensor_data, deltaTime );
-    //
-    // printf( "Estimated Velocity: %f %f %f\n", sensor_data->vel_x, sensor_data->vel_y, sensor_data->vel_z );
-    // printf( "Estimated Position: %f %f %f\n", sensor_data->pos_x, sensor_data->pos_y, sensor_data->pos_z );
     //
     // printf( "--------------------------------------------------------------------------------------------------------------------------------------------\n" );
 }
@@ -112,6 +97,8 @@ void AhrsCalculation::ResetInitial()
     initialPosition.axis.x = 0.0f;
     initialPosition.axis.y = 0.0f;
     initialPosition.axis.z = 0.0f;
+    //
+    previousTimestamp = getMicrosecondTimestamp();
 }
 //
 void AhrsCalculation::ResetInitFusion()
@@ -120,6 +107,8 @@ void AhrsCalculation::ResetInitFusion()
     FusionAhrsInitialise( &ahrs );
     //
     FusionAhrsSetSettings( &ahrs, &settings );
+    //
+    previousTimestamp = getMicrosecondTimestamp();
 }
 //
 void AhrsCalculation::ConfigFusion( std::string content )

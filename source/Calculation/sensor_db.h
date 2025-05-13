@@ -81,31 +81,32 @@ static std::string int64_transaction_to_string( int64_t value )
 struct SENSOR_DB
 {
     int64_t time;
-    float   acc_x   = 0.0f;
-    float   acc_y   = 0.0f;
-    float   acc_z   = 0.0f;
-    float   gyro_x  = 0.0f;
-    float   gyro_y  = 0.0f;
-    float   gyro_z  = 0.0f;
-    float   mag_x   = 0.0f;
-    float   mag_y   = 0.0f;
-    float   mag_z   = 0.0f;
-    float   quate_x = 0.0f;
-    float   quate_y = 0.0f;
-    float   quate_z = 0.0f;
-    float   quate_w = 0.0f;
-    float   roll    = 0.0f;
-    float   pitch   = 0.0f;
-    float   yaw     = 0.0f;
-    float   eacc_x  = 0.0f;
-    float   eacc_y  = 0.0f;
-    float   eacc_z  = 0.0f;
-    float   vel_x   = 0.0f;
-    float   vel_y   = 0.0f;
-    float   vel_z   = 0.0f;
-    float   pos_x   = 0.0f;
-    float   pos_y   = 0.0f;
-    float   pos_z   = 0.0f;
+    float   acc_x     = 0.0f;
+    float   acc_y     = 0.0f;
+    float   acc_z     = 0.0f;
+    float   gyro_x    = 0.0f;
+    float   gyro_y    = 0.0f;
+    float   gyro_z    = 0.0f;
+    float   mag_x     = 0.0f;
+    float   mag_y     = 0.0f;
+    float   mag_z     = 0.0f;
+    float   quate_x   = 0.0f;
+    float   quate_y   = 0.0f;
+    float   quate_z   = 0.0f;
+    float   quate_w   = 0.0f;
+    float   roll      = 0.0f;
+    float   pitch     = 0.0f;
+    float   yaw       = 0.0f;
+    float   eacc_x    = 0.0f;
+    float   eacc_y    = 0.0f;
+    float   eacc_z    = 0.0f;
+    float   vel_x     = 0.0f;
+    float   vel_y     = 0.0f;
+    float   vel_z     = 0.0f;
+    float   pos_x     = 0.0f;
+    float   pos_y     = 0.0f;
+    float   pos_z     = 0.0f;
+    float   deltaTime = 0.0f;
     //
     std::string to_string()
     {
@@ -117,7 +118,9 @@ struct SENSOR_DB
         str += transaction_to_string( roll ) + "," + transaction_to_string( pitch ) + "," + transaction_to_string( yaw ) + ",";
         str += transaction_to_string( eacc_x ) + "," + transaction_to_string( eacc_y ) + "," + transaction_to_string( eacc_z ) + ",";
         str += transaction_to_string( vel_x ) + "," + transaction_to_string( vel_y ) + "," + transaction_to_string( vel_z ) + ",";
-        str += transaction_to_string( pos_x ) + "," + transaction_to_string( pos_y ) + "," + transaction_to_string( pos_z );
+        str += transaction_to_string( pos_x ) + "," + transaction_to_string( pos_y ) + "," + transaction_to_string( pos_z )+ ",";
+        str += transaction_to_string( deltaTime );
+
         return str;
     };
     //
@@ -132,6 +135,8 @@ struct SENSOR_DB
         info += "Estimated Accelerometer: (" + transaction_to_string( eacc_x ) + ", " + transaction_to_string( eacc_y ) + ", " + transaction_to_string( eacc_z ) + ")\n";
         info += "Estimated Velocity: (" + transaction_to_string( vel_x ) + ", " + transaction_to_string( vel_y ) + ", " + transaction_to_string( vel_z ) + ")\n";
         info += "Position: (" + transaction_to_string( pos_x ) + ", " + transaction_to_string( pos_y ) + ", " + transaction_to_string( pos_z ) + ")\n";
+        info += "deltaTime: (" + transaction_to_string( deltaTime )+ ")\n";
+
         return info;
     }
     //
@@ -140,34 +145,35 @@ struct SENSOR_DB
         char delimiter = ',';
         auto values    = splitString( v, delimiter );
         //
-        if ( values.size() == 26 )
+        if ( values.size() == 27 )
         {
-            time    = std::stoll( values[ 0 ] );
-            acc_x   = std::stof( values[ 1 ] );
-            acc_y   = std::stof( values[ 2 ] );
-            acc_z   = std::stof( values[ 3 ] );
-            gyro_x  = std::stof( values[ 4 ] );
-            gyro_y  = std::stof( values[ 5 ] );
-            gyro_z  = std::stof( values[ 6 ] );
-            mag_x   = std::stof( values[ 7 ] );
-            mag_y   = std::stof( values[ 8 ] );
-            mag_z   = std::stof( values[ 9 ] );
-            quate_x = std::stof( values[ 10 ] );
-            quate_y = std::stof( values[ 11 ] );
-            quate_z = std::stof( values[ 12 ] );
-            quate_w = std::stof( values[ 13 ] );
-            roll    = std::stof( values[ 14 ] );
-            pitch   = std::stof( values[ 15 ] );
-            yaw     = std::stof( values[ 16 ] );
-            eacc_x  = std::stof( values[ 17 ] );
-            eacc_y  = std::stof( values[ 18 ] );
-            eacc_z  = std::stof( values[ 19 ] );
-            vel_x   = std::stof( values[ 20 ] );
-            vel_y   = std::stof( values[ 21 ] );
-            vel_z   = std::stof( values[ 22 ] );
-            pos_x   = std::stof( values[ 23 ] );
-            pos_y   = std::stof( values[ 24 ] );
-            pos_z   = std::stof( values[ 25 ] );
+            time      = std::stoll( values[ 0 ] );
+            acc_x     = std::stof( values[ 1 ] );
+            acc_y     = std::stof( values[ 2 ] );
+            acc_z     = std::stof( values[ 3 ] );
+            gyro_x    = std::stof( values[ 4 ] );
+            gyro_y    = std::stof( values[ 5 ] );
+            gyro_z    = std::stof( values[ 6 ] );
+            mag_x     = std::stof( values[ 7 ] );
+            mag_y     = std::stof( values[ 8 ] );
+            mag_z     = std::stof( values[ 9 ] );
+            quate_x   = std::stof( values[ 10 ] );
+            quate_y   = std::stof( values[ 11 ] );
+            quate_z   = std::stof( values[ 12 ] );
+            quate_w   = std::stof( values[ 13 ] );
+            roll      = std::stof( values[ 14 ] );
+            pitch     = std::stof( values[ 15 ] );
+            yaw       = std::stof( values[ 16 ] );
+            eacc_x    = std::stof( values[ 17 ] );
+            eacc_y    = std::stof( values[ 18 ] );
+            eacc_z    = std::stof( values[ 19 ] );
+            vel_x     = std::stof( values[ 20 ] );
+            vel_y     = std::stof( values[ 21 ] );
+            vel_z     = std::stof( values[ 22 ] );
+            pos_x     = std::stof( values[ 23 ] );
+            pos_y     = std::stof( values[ 24 ] );
+            pos_z     = std::stof( values[ 25 ] );
+            deltaTime = std::stof( values[ 26 ] );
         }
     }
 };
