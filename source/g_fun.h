@@ -56,6 +56,7 @@ static void init_out_csv( rapidcsv::Document& csv_doc )
     csv_doc.SetColumnName( 23, "Estimated Position X (m)" );
     csv_doc.SetColumnName( 24, "Estimated Position Y (m)" );
     csv_doc.SetColumnName( 25, "Estimated Position Z (m)" );
+    csv_doc.SetColumnName( 26, "Delta Time (s)" );
 }
 //
 static void update_out_csv( int& index, rapidcsv::Document& csv_doc, const SENSOR_DB& sensor_data )
@@ -88,6 +89,7 @@ static void update_out_csv( int& index, rapidcsv::Document& csv_doc, const SENSO
     csv_doc.SetCell< float >( 23, index, sensor_data.pos_x );
     csv_doc.SetCell< float >( 24, index, sensor_data.pos_y );
     csv_doc.SetCell< float >( 25, index, sensor_data.pos_z );
+    csv_doc.SetCell< float >( 26, index, sensor_data.deltaTime );
     //
     index++;
 }

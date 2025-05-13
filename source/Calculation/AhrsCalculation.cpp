@@ -39,6 +39,7 @@ void AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data )
     {
         return;
     }
+    sensor_data->deltaTime = deltaTime;
     // Update gyroscope AHRS algorithm
     FusionAhrsUpdate( &ahrs, gyroscope, accelerometer, magnetometer, deltaTime );
 
