@@ -25,19 +25,6 @@ struct MotionData
     std::vector< float > velocity;
     std::vector< float > displacement;
 };
-// 验证字符串是否为数字
-static bool isNumber( const std::string& str )
-{
-    for ( char c : str )
-    {
-        if ( ! std::isdigit( c ) )
-        {
-            return false;
-        }
-    }
-    return true;
-}
-//
 //
 class AhrsCalculation
 {
