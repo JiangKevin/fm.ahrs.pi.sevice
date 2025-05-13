@@ -53,6 +53,7 @@ int main()
         if ( startsWith( server.commond_, "Setup" ) )
         {
             ahrs_calculation_.ConfigFusion( server.commond_ );
+            server.str_fusion_config = ahrs_calculation_.GetConfigString();
             // 清空数据：销毁并重新创建
             csv_doc_ = rapidcsv::Document();
             index    = 0;
