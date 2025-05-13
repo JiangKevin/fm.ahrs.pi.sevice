@@ -6,6 +6,12 @@
 #include <string>
 #include <sys/time.h>
 #include <vector>
+
+//
+static bool startsWith( const std::string& str, const std::string& prefix )
+{
+    return str.size() >= prefix.size() && str.compare( 0, prefix.size(), prefix ) == 0;
+}
 // 以纳秒级精度获取当前时间戳
 static long long getNanosecondTimestamp()
 {
@@ -118,7 +124,7 @@ struct SENSOR_DB
         str += transaction_to_string( roll ) + "," + transaction_to_string( pitch ) + "," + transaction_to_string( yaw ) + ",";
         str += transaction_to_string( eacc_x ) + "," + transaction_to_string( eacc_y ) + "," + transaction_to_string( eacc_z ) + ",";
         str += transaction_to_string( vel_x ) + "," + transaction_to_string( vel_y ) + "," + transaction_to_string( vel_z ) + ",";
-        str += transaction_to_string( pos_x ) + "," + transaction_to_string( pos_y ) + "," + transaction_to_string( pos_z )+ ",";
+        str += transaction_to_string( pos_x ) + "," + transaction_to_string( pos_y ) + "," + transaction_to_string( pos_z ) + ",";
         str += transaction_to_string( deltaTime );
 
         return str;
@@ -135,7 +141,7 @@ struct SENSOR_DB
         info += "Estimated Accelerometer: (" + transaction_to_string( eacc_x ) + ", " + transaction_to_string( eacc_y ) + ", " + transaction_to_string( eacc_z ) + ")\n";
         info += "Estimated Velocity: (" + transaction_to_string( vel_x ) + ", " + transaction_to_string( vel_y ) + ", " + transaction_to_string( vel_z ) + ")\n";
         info += "Position: (" + transaction_to_string( pos_x ) + ", " + transaction_to_string( pos_y ) + ", " + transaction_to_string( pos_z ) + ")\n";
-        info += "deltaTime: (" + transaction_to_string( deltaTime )+ ")\n";
+        info += "deltaTime: (" + transaction_to_string( deltaTime ) + ")\n";
 
         return info;
     }

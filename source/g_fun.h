@@ -170,8 +170,3 @@ static bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, AhrsCal
     return true;
 }
 
-//
-static bool startsWith( const std::string& str, const std::string& prefix )
-{
-    return str.size() >= prefix.size() && str.compare( 0, prefix.size(), prefix ) == 0;
-}

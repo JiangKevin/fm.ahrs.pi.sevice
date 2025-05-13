@@ -34,14 +34,15 @@ private:
     void acceptConnections();
     void handleReceive( websocket::stream< tcp::socket >& ws );
 
-    std::string     port_;
-    net::io_context ioc_;
-    tcp::acceptor   acceptor_;
-    std::thread     serverThread_;
+    std::string            port_;
+    net::io_context        ioc_;
+    tcp::acceptor          acceptor_;
+    std::thread            serverThread_;
     std::vector< NET_PTR > net_ptrs_;
     std::mutex             connectionsMutex_;
 public:
-    void handleSend( std::string message );
+    std::string str_fusion_config = "";
+    void        handleSend( std::string message );
 public:
     std::string commond_;
     bool        running_;

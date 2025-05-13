@@ -60,12 +60,13 @@ void WebSocketServer::acceptConnections()
             //
             rec_thread.detach();
             //
-            handleSend( "Connected" );
-            //
             NET_PTR net_ptr;
             net_ptr.connection_ = ws;
             net_ptr.thread_     = &rec_thread;
             net_ptrs_.push_back( net_ptr );
+            //
+            handleSend( "Connected" );
+            handleSend( str_fusion_config.c_str() );
         }
     }
     catch ( const std::exception& e )

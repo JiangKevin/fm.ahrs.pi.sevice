@@ -31,6 +31,7 @@ int main()
 {
     server.setPort( port );
     server.start();
+    server.str_fusion_config = ahrs_calculation_.GetConfigString();
     std::this_thread::sleep_for( std::chrono::seconds( 3 ) );
     //
     init_out_csv( csv_doc_ );
@@ -62,8 +63,7 @@ int main()
             init_sensor( sensor_mmc_, sensor_imu_ );
             server.commond_ = "";
         }
-        //
-        if ( server.commond_ == "Start" )
+        else if ( startsWith( server.commond_, "Start" ) )
         {
             bool ret = read_sensor_data( sensor_mmc_, sensor_imu_, ahrs_calculation_, sensor_data_ );
             if ( ret )
@@ -73,13 +73,13 @@ int main()
                 update_out_csv( index, csv_doc_, sensor_data_ );
             }
         }
-        else if ( server.commond_ == "Pause" )
+        else if ( startsWith( server.commond_, "Pause" ) )
         {
             close_out_csv( csv_doc_ );
             index           = 0;
             server.commond_ = "";
         }
-        else if ( server.commond_ == "Reset" )
+        else if ( startsWith( server.commond_, "Reset" ) )
         {
             // 清空数据：销毁并重新创建
             csv_doc_ = rapidcsv::Document();
@@ -90,12 +90,12 @@ int main()
             init_sensor( sensor_mmc_, sensor_imu_ );
             server.commond_ = "Start";
         }
-        else if ( server.commond_ == "Clear" )
+        else if ( startsWith( server.commond_, "Clear" ) )
         {
             system( "clear" );
             server.commond_ = "Start";
         }
-        else if ( server.commond_ == "Stop" )
+        else if ( startsWith( server.commond_, "Stop" ) )
         {
             server.commond_ = "";
             server.stop();
