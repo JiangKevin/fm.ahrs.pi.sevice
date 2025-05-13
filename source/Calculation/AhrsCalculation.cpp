@@ -121,3 +121,49 @@ void AhrsCalculation::ResetInitFusion()
     //
     FusionAhrsSetSettings( &ahrs, &settings );
 }
+//
+void AhrsCalculation::ConfigFusion( std::string content )
+{
+    char delimiter = ',';
+    auto values    = splitString( content, delimiter );
+    //
+    if ( values.size() == 49 )
+    {
+        //
+        this->gyroscopeMisalignment = { std::stof( values[ 1 ] ), std::stof( values[ 2 ] ), std::stof( values[ 3 ] ), std::stof( values[ 4 ] ), std::stof( values[ 5 ] ), std::stof( values[ 6 ] ), std::stof( values[ 7 ] ), std::stof( values[ 8 ] ), std::stof( values[ 9 ] ) };
+        //
+        this->gyroscopeSensitivity = { std::stof( values[ 10 ] ), std::stof( values[ 11 ] ), std::stof( values[ 12 ] ) };
+        //
+        this->gyroscopeOffset = { std::stof( values[ 13 ] ), std::stof( values[ 14 ] ), std::stof( values[ 15 ] ) };
+        //
+        this->accelerometerMisalignment = { std::stof( values[ 16 ] ), std::stof( values[ 17 ] ), std::stof( values[ 18 ] ), std::stof( values[ 19 ] ), std::stof( values[ 20 ] ), std::stof( values[ 21 ] ), std::stof( values[ 22 ] ), std::stof( values[ 23 ] ), std::stof( values[ 24 ] ) };
+        //
+        this->accelerometerSensitivity = { std::stof( values[ 25 ] ), std::stof( values[ 26 ] ), std::stof( values[ 27 ] ) };
+        this->accelerometerOffset      = { std::stof( values[ 28 ] ), std::stof( values[ 29 ] ), std::stof( values[ 30 ] ) };
+        //
+        this->softIronMatrix = { std::stof( values[ 31 ] ), std::stof( values[ 32 ] ), std::stof( values[ 33 ] ), std::stof( values[ 34 ] ), std::stof( values[ 35 ] ), std::stof( values[ 36 ] ), std::stof( values[ 37 ] ), std::stof( values[ 38 ] ), std::stof( values[ 39 ] ) };
+        //
+        this->hardIronOffset = { std::stof( values[ 40 ] ), std::stof( values[ 41 ] ), std::stof( values[ 42 ] ) };
+        //
+
+        //
+        if ( std::stoi( values[ 43 ] ) == 0 )
+        {
+            this->settings.convention = FusionConventionNwu;
+        }
+        else if ( std::stoi( values[ 43 ] ) == 1 )
+        {
+            this->settings.convention = FusionConventionEnu;
+        }
+        else if ( std::stoi( values[ 43 ] ) == 2 )
+        {
+            this->settings.convention = FusionConventionNed;
+        }
+        //
+        this->settings.gain                  = std::stof( values[ 44 ] );
+        this->settings.gyroscopeRange        = std::stof( values[ 45 ] );
+        this->settings.accelerationRejection = std::stof( values[ 46 ] );
+        this->settings.magneticRejection     = std::stof( values[ 47 ] );
+        this->settings.recoveryTriggerPeriod = std::stoul( values[ 48 ] ) * SAMPLE_RATE;
+    }
+};
