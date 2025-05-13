@@ -47,6 +47,8 @@ void WebSocketServer::acceptConnections()
             auto ws = new websocket::stream< tcp::socket >( std::move( socket ) );
             {
                 std::lock_guard< std::mutex > lock( connectionsMutex_ );
+                //
+                ws->accept();
                 ws->write( net::buffer( "Connected" ) );
                 ws->write( net::buffer( str_fusion_config ) );
             }
@@ -56,7 +58,7 @@ void WebSocketServer::acceptConnections()
             std::thread rec_thread = std::thread(
                 [ this, ws ]()
                 {
-                    ws->accept();
+                    // ws->accept();
                     handleReceive( *ws );
                 } );
             //
