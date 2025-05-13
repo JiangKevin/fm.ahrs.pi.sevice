@@ -67,6 +67,7 @@ public:
     void ResetInitial();
     void ResetInitFusion();
     void ConfigFusion(std::string content);
+    std::string GetConfigString();
 private:
     void calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt );
 };
