@@ -58,6 +58,36 @@ static std::string transaction_to_string( float value )
     return out;
 }
 //
+static std::string int_transaction_to_string( int value )
+{
+    std::string out;
+    if ( std::isnan( value ) )
+    {
+        out = "0";
+    }
+    else
+    {
+        out = std::to_string( value );
+    }
+    //
+    return out;
+}
+//
+static std::string int64_transaction_to_string( int64_t value )
+{
+    std::string out;
+    if ( std::isnan( value ) )
+    {
+        out = "0";
+    }
+    else
+    {
+        out = std::to_string( value );
+    }
+    //
+    return out;
+}
+//
 struct SENSOR_DB
 {
     int64_t time;
@@ -92,7 +122,7 @@ struct SENSOR_DB
     //
     std::string to_string()
     {
-        std::string str = transaction_to_string( time ) + ",";
+        std::string str = int64_transaction_to_string( time ) + ",";
         str += transaction_to_string( acc_x ) + "," + transaction_to_string( acc_y ) + "," + transaction_to_string( acc_z ) + ",";
         str += transaction_to_string( gyro_x ) + "," + transaction_to_string( gyro_y ) + "," + transaction_to_string( gyro_z ) + ",";
         str += transaction_to_string( mag_x ) + "," + transaction_to_string( mag_y ) + "," + transaction_to_string( mag_z ) + ",";
@@ -106,7 +136,7 @@ struct SENSOR_DB
     //
     std::string to_info()
     {
-        std::string info = "Time: " + transaction_to_string( time ) + "\n";
+        std::string info = "Time: " + int64_transaction_to_string( time ) + "\n";
         info += "Accelerometer: (" + transaction_to_string( acc_x ) + ", " + transaction_to_string( acc_y ) + ", " + transaction_to_string( acc_z ) + ")\n";
         info += "Gyroscope: (" + transaction_to_string( gyro_x ) + ", " + transaction_to_string( gyro_y ) + ", " + transaction_to_string( gyro_z ) + ")\n";
         info += "Magnetometer: (" + transaction_to_string( mag_x ) + ", " + transaction_to_string( mag_y ) + ", " + transaction_to_string( mag_z ) + ")\n";
@@ -125,7 +155,7 @@ struct SENSOR_DB
         //
         if ( values.size() == 26 )
         {
-            time    = std::stof( values[ 0 ] );
+            time    = std::stoll( values[ 0 ] );
             acc_x   = std::stof( values[ 1 ] );
             acc_y   = std::stof( values[ 2 ] );
             acc_z   = std::stof( values[ 3 ] );
