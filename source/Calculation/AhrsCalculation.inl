@@ -34,5 +34,5 @@ void AhrsCalculation ::initKF()
     // 过程噪声设为 0.001，观测噪声设为 1e-6（理想数据，噪声极小）
     Eigen::VectorXf initial_acc( 3 );
     initial_acc << 0.0f, 0.0f, 0.0f;
-    akf.init( 0.065f, initial_acc, 0.001f, 0.0002f );
+    akf.init( 0.065f, initial_acc, 0.005f, 0.000001f );
 }
