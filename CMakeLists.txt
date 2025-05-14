@@ -8,7 +8,8 @@ project(${app_name})
 # 设置所有可执行文件的运行时输出目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $ENV{FmDev}/bin)
 # C++17 is required for this project.
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+
 #
 include_directories($ENV{FmDev}/source)
 include_directories($ENV{FmDev}/source/device)
@@ -20,7 +21,7 @@ include_directories($ENV{FmDev}/libs/libgpiod/include)
 find_path(RAPIDCSV_INCLUDE_DIRS "rapidcsv.h")
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(unofficial-concurrentqueue CONFIG REQUIRED)
-
+find_package(Eigen3 CONFIG REQUIRED)
 
 #
 # 查找源文件
@@ -49,4 +50,5 @@ target_link_libraries(${app_name} PUBLIC
     nlohmann_json::nlohmann_json
     #
     $ENV{FmDev}/libs/libgpiod/lib/libgpiod.a
+    # Eigen3::Eigen
 )

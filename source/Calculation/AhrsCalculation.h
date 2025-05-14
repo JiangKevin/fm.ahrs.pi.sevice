@@ -2,9 +2,11 @@
 //
 #pragma once
 //
+#include "Filtering/AccelerationKalmanFilter.h"
 #include "Fusion/Fusion.h"
 #include "concurrentqueue/concurrentqueue.h"
 #include "sensor_db.h"
+#include <Eigen/Dense>
 #include <cctype>
 #include <chrono>
 #include <cmath>
@@ -14,6 +16,7 @@
 #include <string>
 #include <sys/time.h>
 #include <vector>
+
 //
 #define SAMPLE_RATE ( 100 )  // replace this with actual sample rate
 
@@ -39,7 +42,7 @@ public:
     //
     FusionMatrix accelerometerMisalignment = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     FusionVector accelerometerSensitivity  = { 1.0f, 1.0f, 1.0f };
-    FusionVector accelerometerOffset       = { 0.0f, 0.0f, 0.025f };
+    FusionVector accelerometerOffset       = { 0.0f, 0.006f, 0.029f };
     //
     FusionMatrix softIronMatrix = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     FusionVector hardIronOffset = { 0.0f, 0.0f, 0.0f };
@@ -62,12 +65,18 @@ public:
         .magneticRejection     = 10.0f,
         .recoveryTriggerPeriod = 5 * SAMPLE_RATE, /* 5 seconds */
     };
+    //
+    // 创建卡尔曼滤波对象，使用空构造函数
+    AccelerationKalmanFilter akf;
 public:
-    void SolveAnCalculation( SENSOR_DB* sensor_data );
-    void ResetInitial();
-    void ResetInitFusion();
-    void ConfigFusion(std::string content);
+    void        SolveAnCalculation( SENSOR_DB* sensor_data );
+    void        ResetInitial();
+    void        ResetInitFusion();
+    void        ConfigFusion( std::string content );
     std::string GetConfigString();
 private:
     void calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt );
+    //
+    void UseKF( SENSOR_DB* sensor_data, float dt );
+    void initKF();
 };
