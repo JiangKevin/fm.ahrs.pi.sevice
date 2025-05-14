@@ -11,7 +11,7 @@ AhrsCalculation::AhrsCalculation()
 }
 
 //
-void AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data )
+void AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data )
 {
     // Acquire latest sensor data
     const int64_t timestamp = sensor_data->time;
@@ -62,11 +62,26 @@ void AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data )
     sensor_data->eacc_x = earth.axis.x;
     sensor_data->eacc_y = earth.axis.y;
     sensor_data->eacc_z = earth.axis.z;
+    //
+    original_sensor_data->quate_x = quate.element.x;
+    original_sensor_data->quate_y = quate.element.y;
+    original_sensor_data->quate_z = quate.element.z;
+    original_sensor_data->quate_w = quate.element.w;
+    //
+    original_sensor_data->roll  = euler.angle.roll;
+    original_sensor_data->pitch = euler.angle.pitch;
+    original_sensor_data->yaw   = euler.angle.yaw;
+    //
+    original_sensor_data->eacc_x = earth.axis.x;
+    original_sensor_data->eacc_y = earth.axis.y;
+    original_sensor_data->eacc_z = earth.axis.z;
 
     //
     UseKF( sensor_data, deltaTime );
     //
     calculateSurfaceVelocity( sensor_data, deltaTime );
+    //
+    calculateSurfaceVelocity( original_sensor_data, deltaTime );
     //
     // printf( "--------------------------------------------------------------------------------------------------------------------------------------------\n" );
 }

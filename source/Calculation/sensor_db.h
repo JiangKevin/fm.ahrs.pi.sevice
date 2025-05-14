@@ -6,7 +6,15 @@
 #include <string>
 #include <sys/time.h>
 #include <vector>
-
+//
+static std::string removePrefix( const std::string& str, const std::string& prefix )
+{
+    if ( str.find( prefix ) == 0 )
+    {
+        return str.substr( prefix.length() );
+    }
+    return str;
+}
 //
 static bool startsWith( const std::string& str, const std::string& prefix )
 {

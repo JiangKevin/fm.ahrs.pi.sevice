@@ -43,6 +43,7 @@ int main()
     ICM42670 sensor_imu_;
     //
     SENSOR_DB sensor_data_;
+    SENSOR_DB original_sensor_data_;
     //
     init_sensor( sensor_mmc_, sensor_imu_ );
     //
@@ -66,10 +67,17 @@ int main()
         }
         else if ( startsWith( server.commond_, "Start" ) )
         {
-            bool ret = read_sensor_data( sensor_mmc_, sensor_imu_, ahrs_calculation_, sensor_data_ );
+            bool ret = read_sensor_data( sensor_mmc_, sensor_imu_, ahrs_calculation_, sensor_data_, original_sensor_data_ );
             if ( ret )
             {
-                server.handleSend( sensor_data_.to_string() );
+                std::string command = "AfterCalculation:";
+                command += sensor_data_.to_string();
+                // printf("%s\n",command.c_str());
+                server.handleSend( command );
+                //
+                command = "BeforCalculation:";
+                command += original_sensor_data_.to_string();
+                server.handleSend( command );
                 //
                 update_out_csv( index, csv_doc_, sensor_data_ );
             }

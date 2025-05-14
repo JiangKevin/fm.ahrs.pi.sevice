@@ -69,7 +69,7 @@ public:
     // 创建卡尔曼滤波对象，使用空构造函数
     AccelerationKalmanFilter akf;
 public:
-    void        SolveAnCalculation( SENSOR_DB* sensor_data );
+    void        SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data );
     void        ResetInitial();
     void        ResetInitFusion();
     void        ConfigFusion( std::string content );
