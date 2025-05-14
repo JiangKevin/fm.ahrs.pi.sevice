@@ -79,7 +79,10 @@ int main()
                 command += original_sensor_data_.to_string();
                 server.handleSend( command );
                 //
-                update_out_csv( index, csv_doc_, sensor_data_ );
+                if ( index < 10000 )
+                {
+                    update_out_csv( index, csv_doc_, sensor_data_ );
+                }
             }
         }
         else if ( startsWith( server.commond_, "Pause" ) )
