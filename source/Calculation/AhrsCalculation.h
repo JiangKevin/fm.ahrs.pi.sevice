@@ -2,7 +2,7 @@
 //
 #pragma once
 //
-#include "Filtering/AccelerationKalmanFilter.h"
+#include "Filtering/kalman/AccelerationKalmanFilter.h"
 #include "Fusion/Fusion.h"
 #include "concurrentqueue/concurrentqueue.h"
 #include "sensor_db.h"
@@ -55,6 +55,8 @@ public:
     FusionOffset offset;
     FusionAhrs   ahrs;
     int64_t      previousTimestamp;
+    FusionVector previousAcceleration      = { 0.0f, 0.0f, 0.0f };
+    bool         previousAcceleration_init = false;
     float        deltaTime;
     // Set AHRS algorithm settings
     FusionAhrsSettings settings = {

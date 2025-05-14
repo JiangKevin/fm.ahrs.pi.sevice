@@ -1,4 +1,5 @@
 #include "AhrsCalculation.h"
+#include "comput.h"
 #include <cstdio>
 #include <time.h>
 //
@@ -50,6 +51,16 @@ void AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* ori
     const FusionEuler  euler = FusionQuaternionToEuler( quate );
     const FusionVector earth = FusionAhrsGetEarthAcceleration( &ahrs );
     //
+    previousAcceleration.axis.x = earth.axis.x;
+    previousAcceleration.axis.y = earth.axis.y;
+    previousAcceleration.axis.z = earth.axis.z;
+
+    if ( ! previousAcceleration_init )
+    {
+        previousAcceleration_init = true;
+        return;
+    }
+    //
     sensor_data->quate_x = quate.element.x;
     sensor_data->quate_y = quate.element.y;
     sensor_data->quate_z = quate.element.z;
@@ -63,6 +74,10 @@ void AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* ori
     sensor_data->eacc_y = earth.axis.y;
     sensor_data->eacc_z = earth.axis.z;
     //
+    UseKF( sensor_data, deltaTime );
+    //
+    calculateSurfaceVelocity( sensor_data, deltaTime );
+    //
     original_sensor_data->quate_x = quate.element.x;
     original_sensor_data->quate_y = quate.element.y;
     original_sensor_data->quate_z = quate.element.z;
@@ -75,11 +90,6 @@ void AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* ori
     original_sensor_data->eacc_x = earth.axis.x;
     original_sensor_data->eacc_y = earth.axis.y;
     original_sensor_data->eacc_z = earth.axis.z;
-
-    //
-    UseKF( sensor_data, deltaTime );
-    //
-    calculateSurfaceVelocity( sensor_data, deltaTime );
     //
     calculateSurfaceVelocity( original_sensor_data, deltaTime );
     //
@@ -88,10 +98,22 @@ void AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* ori
 //
 void AhrsCalculation::calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt )
 {
+    Eigen::VectorXf a_next( 3 );
+    a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
+    // std::cout << "dt:" << dt << " a_next:\t" << a_next.transpose() << "\n";
+
+    Eigen::VectorXf a_prev( 3 );
+    a_prev << previousAcceleration.axis.x, previousAcceleration.axis.y, previousAcceleration.axis.z;
+    // std::cout << "dt:" << dt << " a_prev:\t" << a_prev.transpose() << "\n";
+
+    auto cur_velocity = computeVelocity( dt, a_prev, a_next );
+
+    // std::cout << "dt:" << dt << " cur_velocity:\t" << cur_velocity.transpose() << "\n";
+
     // Calculate the velocity using the trapezoidal rule
-    initialVelocity.axis.x = initialVelocity.axis.x + ( sensor_data->eacc_x * dt );
-    initialVelocity.axis.y = initialVelocity.axis.y + ( sensor_data->eacc_y * dt );
-    initialVelocity.axis.z = initialVelocity.axis.z + ( sensor_data->eacc_z * dt );
+    initialVelocity.axis.x = initialVelocity.axis.x + ( cur_velocity[ 0 ] );
+    initialVelocity.axis.y = initialVelocity.axis.y + ( cur_velocity[ 1 ] );
+    initialVelocity.axis.z = initialVelocity.axis.z + ( cur_velocity[ 2 ] );
     //
     sensor_data->vel_x = initialVelocity.axis.x;
     sensor_data->vel_y = initialVelocity.axis.y;
@@ -107,6 +129,7 @@ void AhrsCalculation::calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt
     sensor_data->pos_y = initialPosition.axis.y;
     sensor_data->pos_z = initialPosition.axis.z;
 }
+
 //
 void AhrsCalculation::ResetInitial()
 {
@@ -117,6 +140,10 @@ void AhrsCalculation::ResetInitial()
     initialPosition.axis.x = 0.0f;
     initialPosition.axis.y = 0.0f;
     initialPosition.axis.z = 0.0f;
+    //
+    previousAcceleration.axis.x = 0.0f;
+    previousAcceleration.axis.y = 0.0f;
+    previousAcceleration.axis.z = 0.0f;
     //
     previousTimestamp = getMicrosecondTimestamp();
 }
@@ -129,6 +156,10 @@ void AhrsCalculation::ResetInitFusion()
     FusionAhrsSetSettings( &ahrs, &settings );
     //
     previousTimestamp = getMicrosecondTimestamp();
+
+    previousAcceleration.axis.x = 0.0f;
+    previousAcceleration.axis.y = 0.0f;
+    previousAcceleration.axis.z = 0.0f;
 }
 //
 void AhrsCalculation::ConfigFusion( std::string content )
@@ -261,41 +292,6 @@ std::string AhrsCalculation::GetConfigString()
     //
     return content_str;
 }
+
 //
-void AhrsCalculation::UseKF( SENSOR_DB* sensor_data, float dt )
-{
-    // 模拟真实加速度（理想数据，无噪声），例如恒定加速度 [1.5, -2.0, 0.5] m/s²
-    Eigen::VectorXf true_acc( 3 );
-    true_acc << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
-    // 1. 预测步骤
-    akf.predict();
-    Eigen::VectorXf predicted = akf.getState();
-    // std::cout << "predicted:\t" << predicted.transpose() << "\n";
-
-    // 2. 测量步骤：这里直接用理想真实加速度
-    // std::cout << "true_acc:\t" << true_acc.transpose() << "\n";
-
-    // 3. 更新步骤
-    akf.update( true_acc );
-    Eigen::VectorXf updated = akf.getState();
-
-    // 输出预测、测量和更新后的加速度（单位：m/s²）
-    // std::cout << "updated:\t" << updated.transpose() << "\n";
-    //
-    Eigen::VectorXf result = updated.transpose();
-    //
-    sensor_data->eacc_x = result[ 0 ];
-    sensor_data->eacc_y = result[ 1 ];
-    sensor_data->eacc_z = result[ 2 ];
-}
-
-void AhrsCalculation ::initKF()
-{
-    // 初始化滤波器：
-    // 时间步长 dt = 0.065 s；
-    // 初始加速度：假设初始为 [0, 0, 0] m/s²；
-    // 过程噪声设为 0.001，观测噪声设为 1e-6（理想数据，噪声极小）
-    Eigen::VectorXf initial_acc( 3 );
-    initial_acc << 0.0f, 0.0f, 0.0f;
-    akf.init( 0.065f, initial_acc, 0.001f, 1e-6f );
-}
+#include "AhrsCalculation.inl"
