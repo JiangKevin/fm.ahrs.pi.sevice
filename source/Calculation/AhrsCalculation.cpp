@@ -110,7 +110,7 @@ void AhrsCalculation::calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt
     sensor_data->eacc_x = out_x;
     sensor_data->eacc_y = out_y;
     sensor_data->eacc_z = out_z;
-    printf( "out_X= %f ,out_y= %f ,out_X= %f\n", out_x, out_y, out_z );
+    // printf( "out_X= %f ,out_y= %f ,out_X= %f\n", out_x, out_y, out_z );
     if ( ( out_x == 0 ) && ( out_y == 0 ) && ( out_z == 0 ) )
     {
         sensor_data->vel_x = 0.0f;
@@ -144,11 +144,19 @@ void AhrsCalculation::calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt
         sensor_data->vel_y = initialVelocity.axis.y;
         sensor_data->vel_z = initialVelocity.axis.z;
 
-        //
         // Calculate the position using the trapezoidal rule
-        initialPosition.axis.x = initialPosition.axis.x + ( sensor_data->vel_x * dt );
-        initialPosition.axis.y = initialPosition.axis.y + ( sensor_data->vel_y * dt );
-        initialPosition.axis.z = initialPosition.axis.z + ( sensor_data->vel_z * dt );
+        if ( sensor_data->vel_x != 0.0f )
+        {
+            initialPosition.axis.x = initialPosition.axis.x + ( sensor_data->vel_x * dt );
+        }
+        if ( sensor_data->vel_y != 0.0f )
+        {
+            initialPosition.axis.y = initialPosition.axis.y + ( sensor_data->vel_y * dt );
+        }
+        if ( sensor_data->vel_z != 0.0f )
+        {
+            initialPosition.axis.z = initialPosition.axis.z + ( sensor_data->vel_z * dt );
+        }
         //
         sensor_data->pos_x = initialPosition.axis.x;
         sensor_data->pos_y = initialPosition.axis.y;
