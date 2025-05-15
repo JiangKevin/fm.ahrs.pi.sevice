@@ -2,10 +2,10 @@
 //
 #pragma once
 //
+#include "Filtering/LowPass/LowPassFilter.h"
 #include "Filtering/kalman/ExtendedAccelerationKalmanFilter.h"
 #include "Fusion/Fusion.h"
 #include "concurrentqueue/concurrentqueue.h"
-#include "Filtering/LowPass/LowPassFilter.h"
 #include "sensor_db.h"
 #include <Eigen/Dense>
 #include <cctype>
@@ -73,13 +73,13 @@ public:
     // 创建卡尔曼滤波对象，使用空构造函数
     ExtendedAccelerationKalmanFilter akf;
 public:
-    void        SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data );
+    bool        SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data );
     void        ResetInitial();
     void        ResetInitFusion();
     void        ConfigFusion( std::string content );
     std::string GetConfigString();
 private:
-    void calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt );
+    bool calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt, bool is_lp );
     //
     // 修改后的函数：采用低通滤波器对三个轴的加速度进行滤波，
     // 当经过滤波后的每个轴如果低于各自的阈值时，认为该轴输出 0；

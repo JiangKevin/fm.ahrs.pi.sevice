@@ -63,9 +63,9 @@ void AhrsCalculation ::initKF()
 void AhrsCalculation::filterAcceleration( float ax, float ay, float az, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z )
 {
     // 使用 static 保证低通滤波器状态在多次调用间保持
-    static LowPassFilter filterX( 0.1f );
-    static LowPassFilter filterY( 0.1f );
-    static LowPassFilter filterZ( 0.1f );
+    static LowPassFilter filterX( 1.0f );
+    static LowPassFilter filterY( 1.0f );
+    static LowPassFilter filterZ( 1.0f );
 
     // 对各个轴进行低通滤波
     float fx = filterX.filter( ax );
