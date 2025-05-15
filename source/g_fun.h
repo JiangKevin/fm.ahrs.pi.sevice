@@ -11,6 +11,7 @@
 #include <string>
 #include <string_view>
 #include <unistd.h>
+#include "Calculation/FmCalculation.h"
 //
 //
 const std::string i2cDevice         = "/dev/i2c-1";
@@ -180,4 +181,72 @@ static bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, AhrsCal
     std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
     //
     return ret;
+}
+//
+//
+static bool fm_read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, AhrsCalculation& ahrs_calculation, SENSOR_DB& sensor_data, SENSOR_DB& original_sensor_data )
+{
+
+    //
+    sensor_data.time = getMicrosecondTimestamp();
+    // printf( "Time: %ld\n", sensor_data.time );
+    // MMC56x3
+    float x, y, z;
+    if ( sensor_mmc.getEvent( x, y, z ) )
+    {
+        sensor_data.mag_x = x;
+        sensor_data.mag_y = y;
+        sensor_data.mag_z = z;
+        //
+        original_sensor_data.mag_x = x;
+        original_sensor_data.mag_y = y;
+        original_sensor_data.mag_z = z;
+    }
+    else
+    {
+        return false;
+    }
+    float temp = sensor_mmc.readTemperature();
+    if ( std::isnan( temp ) )
+    {
+        return false;
+    }
+    // TDK42607
+    inv_imu_sensor_event_t imu_event;
+    // Get last event
+    sensor_imu.getDataFromRegisters( imu_event );
+    //
+    sensor_data.acc_x  = imu_event.accel[ 0 ] / 2048.0;
+    sensor_data.acc_y  = imu_event.accel[ 1 ] / 2048.0;
+    sensor_data.acc_z  = imu_event.accel[ 2 ] / 2048.0;
+    sensor_data.gyro_x = imu_event.gyro[ 0 ] / 16.4;
+    sensor_data.gyro_y = imu_event.gyro[ 1 ] / 16.4;
+    sensor_data.gyro_z = imu_event.gyro[ 2 ] / 16.4;
+    //
+    original_sensor_data.acc_x  = imu_event.accel[ 0 ] / 2048.0;
+    original_sensor_data.acc_y  = imu_event.accel[ 1 ] / 2048.0;
+    original_sensor_data.acc_z  = imu_event.accel[ 2 ] / 2048.0;
+    original_sensor_data.gyro_x = imu_event.gyro[ 0 ] / 16.4;
+    original_sensor_data.gyro_y = imu_event.gyro[ 1 ] / 16.4;
+    original_sensor_data.gyro_z = imu_event.gyro[ 2 ] / 16.4;
+
+    //
+    SensorData sd;
+    sd.gyro  = Eigen::Vector3f( sensor_data.gyro_x, sensor_data.gyro_y, sensor_data.gyro_z );  // 示例陀螺仪数据
+    sd.accel = Eigen::Vector3f( sensor_data.acc_x, sensor_data.acc_y, sensor_data.acc_z );     // 示例加速度计数据
+    sd.mag   = Eigen::Vector3f( sensor_data.mag_x, sensor_data.mag_y, sensor_data.mag_z );     // 示例磁力计数据
+    //
+    Eigen::Vector3f eulerAngles = computeEulerAngles( sd );
+    Eigen::Vector3f linearAccel = computeLinearAcceleration( sd, eulerAngles );
+    //
+    sensor_data.roll   = eulerAngles[ 0 ];
+    sensor_data.pitch  = eulerAngles[ 1 ];
+    sensor_data.yaw    = eulerAngles[ 2 ];
+    sensor_data.eacc_x = linearAccel[ 0 ];
+    sensor_data.eacc_y = linearAccel[ 1 ];
+    sensor_data.eacc_z = linearAccel[ 2 ];
+    // Run @ ODR 100Hz:10
+    std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
+    //
+    return true;
 }
