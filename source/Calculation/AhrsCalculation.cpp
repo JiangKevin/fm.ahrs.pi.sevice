@@ -99,7 +99,11 @@ bool AhrsCalculation::calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt
     float out_x = 0, out_y = 0, out_z = 0;
     if ( is_lp )
     {
-        filterAcceleration( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z, out_x, out_y, out_z, 0.025f, 0.025f, 0.025f );
+        // filterAcceleration( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z, out_x, out_y, out_z, 0.025f, 0.025f, 0.025f );
+        // filterAccelerationWithAngles( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z, sensor_data->roll, sensor_data->pitch, sensor_data->yaw, out_x, out_y, out_z, 0.025f, 0.025f, 0.025f );
+        // filterAccelerationWithMagnetometer( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z, sensor_data->mag_x, sensor_data->mag_y, sensor_data->mag_z, out_x, out_y, out_z, 0.025f, 0.025f, 0.025f );
+        filterAccelerationWithYawNoGravity( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z, sensor_data->yaw, out_x, out_y, out_z, 0.025f, 0.025f, 0.025f );
+
         //
         sensor_data->eacc_x = out_x;
         sensor_data->eacc_y = out_y;

@@ -85,6 +85,9 @@ private:
     // 当经过滤波后的每个轴如果低于各自的阈值时，认为该轴输出 0；
     // 函数接口增加三个阈值参数：threshold_x, threshold_y, threshold_z
     void filterAcceleration( float ax, float ay, float az, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z );
+    void filterAccelerationWithMagnetometer( float ax, float ay, float az, float mx, float my, float mz, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z );
+    void filterAccelerationWithAngles( float ax, float ay, float az, float roll, float pitch, float yaw, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z );
+    void filterAccelerationWithYawNoGravity( float ax, float ay, float az, float yaw, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z );
     //
     void UseKF( SENSOR_DB* sensor_data, float dt );
     void initKF();
