@@ -5,6 +5,7 @@
 #include <boost/asio.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
+#include "Calculation/sensor_db.h"
 #include <mutex>
 #include <string>
 #include <thread>
@@ -44,8 +45,10 @@ public:
     std::string str_fusion_config = "";
     void        handleSend( std::string message );
 public:
+    int64_t     start_time = 0;
     std::string commond_;
     bool        running_;
+private:
 };
 
 #endif

@@ -14,6 +14,7 @@ AhrsCalculation::AhrsCalculation()
 //
 void AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data )
 {
+    float elapsed_time = ( float )( getMicrosecondTimestamp() - start_time ) / ( float )CLOCKS_PER_SEC;
     // Acquire latest sensor data
     const int64_t timestamp = sensor_data->time;
     // printf( "Timestamp Delta Time: %ld\n", timestamp );
@@ -75,8 +76,18 @@ void AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* ori
     sensor_data->eacc_z = earth.axis.z;
     //
     UseKF( sensor_data, deltaTime );
-    //
-    calculateSurfaceVelocity( sensor_data, deltaTime );
+    // 超过两分钟再计算速度
+    if ( elapsed_time > 120 )
+    {
+        float out_x = 0, out_y = 0, out_z = 0;
+        filterAcceleration( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z, out_x, out_y, out_z, 0.05f, 0.05f, 0.05f );
+        //
+        sensor_data->eacc_x = out_x;
+        sensor_data->eacc_y = out_y;
+        sensor_data->eacc_z = out_z;
+        //
+        calculateSurfaceVelocity( sensor_data, deltaTime );
+    }
     //
     original_sensor_data->quate_x = quate.element.x;
     original_sensor_data->quate_y = quate.element.y;
@@ -91,7 +102,11 @@ void AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* ori
     original_sensor_data->eacc_y = earth.axis.y;
     original_sensor_data->eacc_z = earth.axis.z;
     //
-    calculateSurfaceVelocity( original_sensor_data, deltaTime );
+    // 超过两分钟再计算速度
+    if ( elapsed_time > 120 )
+    {
+        calculateSurfaceVelocity( original_sensor_data, deltaTime );
+    }
     //
     // printf( "--------------------------------------------------------------------------------------------------------------------------------------------\n" );
 }

@@ -87,6 +87,11 @@ void WebSocketServer::handleReceive( websocket::stream< tcp::socket >& ws )
             std::string message = beast::buffers_to_string( buffer.data() );
             //
             commond_ = message;
+            if ( startsWith( commond_, "Start" ) || startsWith( commond_, "Clear" ) || startsWith( commond_, "Reset" ) )
+            {
+                start_time = getMicrosecondTimestamp();
+            }
+
             //
             std::cout << "Server received: " << message << std::endl;
             buffer.consume( buffer.size() );
@@ -163,3 +168,4 @@ void WebSocketServer::stop()
         }
     }
 }
+//

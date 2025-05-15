@@ -67,6 +67,8 @@ int main()
         }
         else if ( startsWith( server.commond_, "Start" ) )
         {
+            ahrs_calculation_.start_time = server.start_time;
+            //
             bool ret = read_sensor_data( sensor_mmc_, sensor_imu_, ahrs_calculation_, sensor_data_, original_sensor_data_ );
             if ( ret )
             {

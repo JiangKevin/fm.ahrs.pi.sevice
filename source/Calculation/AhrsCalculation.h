@@ -2,9 +2,10 @@
 //
 #pragma once
 //
-#include "Filtering/kalman/AccelerationKalmanFilter.h"
+#include "Filtering/kalman/ExtendedAccelerationKalmanFilter.h"
 #include "Fusion/Fusion.h"
 #include "concurrentqueue/concurrentqueue.h"
+#include "Filtering/LowPass/LowPassFilter.h"
 #include "sensor_db.h"
 #include <Eigen/Dense>
 #include <cctype>
@@ -42,7 +43,7 @@ public:
     //
     FusionMatrix accelerometerMisalignment = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     FusionVector accelerometerSensitivity  = { 1.0f, 1.0f, 1.0f };
-    FusionVector accelerometerOffset       = { 0.0f, 0.006f, 0.029f };
+    FusionVector accelerometerOffset       = { 0.001f, 0.007f, 0.031f };
     //
     FusionMatrix softIronMatrix = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     FusionVector hardIronOffset = { 0.0f, 0.0f, 0.0f };
@@ -51,6 +52,7 @@ public:
     // 初始位置
     FusionVector initialPosition = { 0.0f, 0.0f, 0.0f };
 public:
+    int64_t start_time = 0;
     // Initialise algorithms
     FusionOffset offset;
     FusionAhrs   ahrs;
@@ -69,7 +71,7 @@ public:
     };
     //
     // 创建卡尔曼滤波对象，使用空构造函数
-    AccelerationKalmanFilter akf;
+    ExtendedAccelerationKalmanFilter akf;
 public:
     void        SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data );
     void        ResetInitial();
@@ -78,6 +80,11 @@ public:
     std::string GetConfigString();
 private:
     void calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt );
+    //
+    // 修改后的函数：采用低通滤波器对三个轴的加速度进行滤波，
+    // 当经过滤波后的每个轴如果低于各自的阈值时，认为该轴输出 0；
+    // 函数接口增加三个阈值参数：threshold_x, threshold_y, threshold_z
+    void filterAcceleration( float ax, float ay, float az, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z );
     //
     void UseKF( SENSOR_DB* sensor_data, float dt );
     void initKF();
