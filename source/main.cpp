@@ -76,10 +76,10 @@ int main()
                 command += sensor_data_.to_string();
                 // printf("%s\n",command.c_str());
                 server.handleSend( command );
-                //
-                command = "BeforCalculation:";
-                command += original_sensor_data_.to_string();
-                server.handleSend( command );
+                // //
+                // command = "BeforCalculation:";
+                // command += original_sensor_data_.to_string();
+                // server.handleSend( command );
                 //
                 if ( index < 10000 )
                 {

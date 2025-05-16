@@ -191,6 +191,7 @@ void AhrsCalculation::filterAccelerationWithYawNoGravity( float ax, float ay, fl
     float adjusted_fx = lateral_x + forward_component * cos_yaw;
     float adjusted_fy = lateral_y + forward_component * sin_yaw;
 
+
     // 根据各轴阈值判断：低于阈值视为噪声，输出 0；否则输出滤波（及调整）后的结果
     out_ax = ( std::fabs( adjusted_fx ) < threshold_x ) ? 0.0f : adjusted_fx;
     out_ay = ( std::fabs( adjusted_fy ) < threshold_y ) ? 0.0f : adjusted_fy;
