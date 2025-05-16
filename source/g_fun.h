@@ -11,7 +11,7 @@
 #include <string>
 #include <string_view>
 #include <unistd.h>
-#include "Calculation/FmCalculation.h"
+#include "Calculation/comput.h"
 //
 //
 const std::string i2cDevice         = "/dev/i2c-1";

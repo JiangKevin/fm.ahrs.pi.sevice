@@ -141,7 +141,7 @@ bool AhrsCalculation::calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt
         a_prev << previousAcceleration.axis.x, previousAcceleration.axis.y, previousAcceleration.axis.z;
         // std::cout << "dt:" << dt << " a_prev:\t" << a_prev.transpose() << "\n";
 
-        auto cur_velocity = computeVelocity( dt, a_prev, a_next );
+        auto cur_velocity = computeVelocityOfTrapezoid( dt, a_prev, a_next );
         // std::cout << "dt:" << dt << " cur_velocity:\t" << cur_velocity.transpose() << "\n";
 
         // Calculate the velocity using the trapezoidal rule
