@@ -71,7 +71,7 @@ int main()
             start_dalta_index++;
             ahrs_calculation_.start_time = server.start_time;
             //
-            bool read_ret = read_sensor_data( sensor_mmc_, sensor_imu_, ahrs_calculation_, sensor_data_, original_sensor_data_ );
+            bool read_ret = read_sensor_data( sensor_mmc_, sensor_imu_, sensor_data_, original_sensor_data_ );
             if ( read_ret )
             {
                 if ( start_dalta_index > 10 )
@@ -79,9 +79,7 @@ int main()
                     start_dalta_index = 11;
                     //
                     auto calcula_ret = ahrs_calculation_.SolveAnCalculation( &sensor_data_, &original_sensor_data_ );
-
-                    // Run @ ODR 100Hz:10
-                    std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
+                    //
                     if ( calcula_ret )
                     {
                         //
@@ -99,6 +97,8 @@ int main()
                             update_out_csv( index, csv_doc_, sensor_data_ );
                         }
                     }
+                    // Run @ ODR 100Hz:10
+                    std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
                 }
             }
         }

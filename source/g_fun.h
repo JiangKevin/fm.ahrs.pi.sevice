@@ -1,6 +1,7 @@
 #pragma once
 //
 #include "Calculation/AhrsCalculation.h"
+#include "Calculation/comput.h"
 #include "MMC56x3/MMC56x3.h"
 #include "TDK40607P/ICM42670P.h"
 #include "concurrentqueue/concurrentqueue.h"
@@ -11,7 +12,6 @@
 #include <string>
 #include <string_view>
 #include <unistd.h>
-#include "Calculation/comput.h"
 //
 //
 const std::string i2cDevice         = "/dev/i2c-1";
@@ -130,7 +130,7 @@ static void init_sensor( MMC56x3& sensor_mmc, ICM42670& sensor_imu )
     std::this_thread::sleep_for( std::chrono::milliseconds( 1000 ) );
 }
 //
-static bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, AhrsCalculation& ahrs_calculation, SENSOR_DB& sensor_data, SENSOR_DB& original_sensor_data )
+static bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, SENSOR_DB& sensor_data, SENSOR_DB& original_sensor_data )
 {
     //
     sensor_data.time = getMicrosecondTimestamp();
@@ -174,7 +174,6 @@ static bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, AhrsCal
     original_sensor_data.gyro_x = imu_event.gyro[ 0 ] / 16.4;
     original_sensor_data.gyro_y = imu_event.gyro[ 1 ] / 16.4;
     original_sensor_data.gyro_z = imu_event.gyro[ 2 ] / 16.4;
-    //
 
     //
     return true;
