@@ -1,10 +1,10 @@
 
 #pragma once
 // /
+#include "sensor_db.h"
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <iostream>
-
 // 结构体定义传感器数据
 struct SensorData
 {
@@ -46,4 +46,20 @@ static Eigen::VectorXf computeVelocityOfTrapezoid( float dt, const Eigen::Vector
 {
     Eigen::VectorXf v = 0.5 * ( a_prev + a_next ) * dt;
     return v;
+}
+// 计算两个向量的点积
+static float dotProduct( float ax, float ay, float az, float mx, float my, float mz )
+{
+    return ax * mx + ay * my + az * mz;
+}
+// 判断加速度数据是否应当被过滤：返回 true 表示方向相反，需要过滤掉
+static bool shouldFilterAcceleration( float ax, float ay, float az, float mx, float my, float mz )
+{
+    // 如果点积小于 0，则说明加速度方向与磁力计方向相反
+    auto dp  = dotProduct( ax, ay, az, mx, my, mz );
+    auto ret = dp < 0.0f;
+    // printf( "ret= %d , ax= %f , ay= %f , az= %f , mx= %f , my= %f , mz= %f , dp= %f \n", ret, ax, ay, az, mx, my, mz, dp );
+    // printf( "%d , %f , %f , %f , %f , %f , %f , %f \n", ret, ax, ay, az, mx, my, mz, dp );
+    //
+    return ret;
 }

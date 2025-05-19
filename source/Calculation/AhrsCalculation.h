@@ -62,14 +62,15 @@ public:
     float        deltaTime;
     // Set AHRS algorithm settings
     FusionAhrsSettings settings = {
-        .convention            = FusionConventionNwu,
+        .convention            = FusionConventionEnu,
         .gain                  = 0.5f,
         .gyroscopeRange        = 2000.0f, /* replace this with actual gyroscope range in degrees/s */
         .accelerationRejection = 10.0f,
         .magneticRejection     = 10.0f,
         .recoveryTriggerPeriod = 5 * SAMPLE_RATE, /* 5 seconds */
     };
-    //
+    // 标准位置的磁力计数值
+
     // 创建卡尔曼滤波对象，使用空构造函数
     ExtendedAccelerationKalmanFilter akf;
 public:
@@ -79,15 +80,10 @@ public:
     void        ConfigFusion( std::string content );
     std::string GetConfigString();
 private:
-    bool calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt, bool is_lp );
+    bool calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt, bool is_lp, bool is_trapezoid );
     //
-    // 修改后的函数：采用低通滤波器对三个轴的加速度进行滤波，
-    // 当经过滤波后的每个轴如果低于各自的阈值时，认为该轴输出 0；
-    // 函数接口增加三个阈值参数：threshold_x, threshold_y, threshold_z
-    void filterAcceleration( float ax, float ay, float az, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z );
-    void filterAccelerationWithMagnetometer( float ax, float ay, float az, float mx, float my, float mz, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z );
-    void filterAccelerationWithAngles( float ax, float ay, float az, float roll, float pitch, float yaw, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z );
     void filterAccelerationWithYawNoGravity( float ax, float ay, float az, float yaw, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z );
+    void filterAccelerationWithMagAndLp( float ax, float ay, float az, float mx, float my, float mz, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z );
     //
     void UseKF( SENSOR_DB* sensor_data, float dt );
     void initKF();
