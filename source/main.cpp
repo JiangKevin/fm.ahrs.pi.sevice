@@ -63,35 +63,51 @@ int main()
             ahrs_calculation_.ResetInitFusion();
             ahrs_calculation_.ResetInitial();
             init_sensor( sensor_mmc_, sensor_imu_ );
-            server.commond_ = "";
+            server.commond_   = "";
+            start_dalta_index = 0;
         }
         else if ( startsWith( server.commond_, "Start" ) )
         {
+            start_dalta_index++;
             ahrs_calculation_.start_time = server.start_time;
             //
-            bool ret = read_sensor_data( sensor_mmc_, sensor_imu_, ahrs_calculation_, sensor_data_, original_sensor_data_ );
-            if ( ret )
+            bool read_ret = read_sensor_data( sensor_mmc_, sensor_imu_, ahrs_calculation_, sensor_data_, original_sensor_data_ );
+            if ( read_ret )
             {
-                std::string command = "AfterCalculation:";
-                command += sensor_data_.to_string();
-                // printf("%s\n",command.c_str());
-                server.handleSend( command );
-                //
-                command = "BeforCalculation:";
-                command += original_sensor_data_.to_string();
-                server.handleSend( command );
-                //
-                if ( index < 10000 )
+                if ( start_dalta_index > 10 )
                 {
-                    update_out_csv( index, csv_doc_, sensor_data_ );
+                    start_dalta_index = 11;
+                    //
+                    auto calcula_ret = ahrs_calculation_.SolveAnCalculation( &sensor_data_, &original_sensor_data_ );
+
+                    // Run @ ODR 100Hz:10
+                    std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
+                    if ( calcula_ret )
+                    {
+                        //
+                        std::string command = "AfterCalculation:";
+                        command += sensor_data_.to_string();
+                        // printf("%s\n",command.c_str());
+                        server.handleSend( command );
+                        //
+                        command = "BeforCalculation:";
+                        command += original_sensor_data_.to_string();
+                        server.handleSend( command );
+                        //
+                        if ( index < 10000 )
+                        {
+                            update_out_csv( index, csv_doc_, sensor_data_ );
+                        }
+                    }
                 }
             }
         }
         else if ( startsWith( server.commond_, "Pause" ) )
         {
             close_out_csv( csv_doc_ );
-            index           = 0;
-            server.commond_ = "";
+            index             = 0;
+            server.commond_   = "";
+            start_dalta_index = 0;
         }
         else if ( startsWith( server.commond_, "Reset" ) )
         {
@@ -102,16 +118,19 @@ int main()
             //
             ahrs_calculation_.ResetInitial();
             init_sensor( sensor_mmc_, sensor_imu_ );
-            server.commond_ = "Start";
+            server.commond_   = "Start";
+            start_dalta_index = 0;
         }
         else if ( startsWith( server.commond_, "Clear" ) )
         {
             system( "clear" );
-            server.commond_ = "Start";
+            server.commond_   = "Start";
+            start_dalta_index = 0;
         }
         else if ( startsWith( server.commond_, "Stop" ) )
         {
-            server.commond_ = "";
+            server.commond_   = "";
+            start_dalta_index = 0;
             server.stop();
         }
     }

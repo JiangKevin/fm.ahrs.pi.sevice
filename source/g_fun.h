@@ -175,11 +175,8 @@ static bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, AhrsCal
     original_sensor_data.gyro_y = imu_event.gyro[ 1 ] / 16.4;
     original_sensor_data.gyro_z = imu_event.gyro[ 2 ] / 16.4;
     //
-    auto ret = ahrs_calculation.SolveAnCalculation( &sensor_data, &original_sensor_data );
 
-    // Run @ ODR 100Hz:10
-    std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
     //
-    return ret;
+    return true;
 }
 //

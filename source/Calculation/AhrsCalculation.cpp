@@ -103,16 +103,61 @@ bool AhrsCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool
     if ( is_efk )
     {
         Eigen::Vector3f acc( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z );
+
+        // 为每个轴设置不同的阈值
+        Eigen::Vector3f axesThreshold( 0.03f, 0.05f, 0.2f );
         //
-        runEkf( acc, dt, initialVelocity.axis.x, initialVelocity.axis.y, initialVelocity.axis.z, initialPosition.axis.x, initialPosition.axis.y, initialPosition.axis.z );
+        auto is_quiescence = isStationary( acc, axesThreshold );
+        printf( "is_quiescence: %d , dalta_index: %d \n", is_quiescence, dalta_index );
         //
-        sensor_data->vel_x = initialVelocity.axis.x;
-        sensor_data->vel_y = initialVelocity.axis.y;
-        sensor_data->vel_z = initialVelocity.axis.z;
-        //
-        sensor_data->pos_x = initialPosition.axis.x;
-        sensor_data->pos_y = initialPosition.axis.y;
-        sensor_data->pos_z = initialPosition.axis.z;
+        if ( ! is_quiescence )
+        {
+            dalta_index = 0;
+            //
+            runEkf( acc, dt, initialVelocity.axis.x, initialVelocity.axis.y, initialVelocity.axis.z, initialPosition.axis.x, initialPosition.axis.y, initialPosition.axis.z );
+            //
+            sensor_data->vel_x = initialVelocity.axis.x;
+            sensor_data->vel_y = initialVelocity.axis.y;
+            sensor_data->vel_z = initialVelocity.axis.z;
+            //
+            sensor_data->pos_x = initialPosition.axis.x;
+            sensor_data->pos_y = initialPosition.axis.y;
+            sensor_data->pos_z = initialPosition.axis.z;
+        }
+        else
+        {
+            dalta_index++;
+            //
+            if ( dalta_index > 5 )
+            {
+                dalta_index = 6;
+                //
+                sensor_data->eacc_x = 0.0f;
+                sensor_data->eacc_y = 0.0f;
+                sensor_data->eacc_z = 0.0f;
+                //
+                sensor_data->vel_x = 0.0f;
+                sensor_data->vel_y = 0.0f;
+                sensor_data->vel_z = 0.0f;
+                //
+                sensor_data->pos_x = initialPosition.axis.x;
+                sensor_data->pos_y = initialPosition.axis.y;
+                sensor_data->pos_z = initialPosition.axis.z;
+            }
+            else
+            {
+                //
+                runEkf( acc, dt, initialVelocity.axis.x, initialVelocity.axis.y, initialVelocity.axis.z, initialPosition.axis.x, initialPosition.axis.y, initialPosition.axis.z );
+                //
+                sensor_data->vel_x = initialVelocity.axis.x;
+                sensor_data->vel_y = initialVelocity.axis.y;
+                sensor_data->vel_z = initialVelocity.axis.z;
+                //
+                sensor_data->pos_x = initialPosition.axis.x;
+                sensor_data->pos_y = initialPosition.axis.y;
+                sensor_data->pos_z = initialPosition.axis.z;
+            }
+        }
     }
     else
     {
@@ -122,20 +167,20 @@ bool AhrsCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool
         //
         previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
         //
-        initialVelocity.axis.x += ret_v[ 0 ];
-        initialVelocity.axis.y += ret_v[ 1 ];
-        initialVelocity.axis.z += ret_v[ 2 ];
-        initialPosition.axis.x = initialPosition.axis.x + ( initialVelocity.axis.x * dt );
-        initialPosition.axis.y = initialPosition.axis.y + ( initialVelocity.axis.y * dt );
-        initialPosition.axis.z = initialPosition.axis.z + ( initialVelocity.axis.z * dt );
+        original_initialVelocity.axis.x += ret_v[ 0 ];
+        original_initialVelocity.axis.y += ret_v[ 1 ];
+        original_initialVelocity.axis.z += ret_v[ 2 ];
+        original_initialPosition.axis.x = original_initialPosition.axis.x + ( original_initialVelocity.axis.x * dt );
+        original_initialPosition.axis.y = original_initialPosition.axis.y + ( original_initialVelocity.axis.y * dt );
+        original_initialPosition.axis.z = original_initialPosition.axis.z + ( original_initialVelocity.axis.z * dt );
         //
-        sensor_data->vel_x = initialVelocity.axis.x;
-        sensor_data->vel_y = initialVelocity.axis.y;
-        sensor_data->vel_z = initialVelocity.axis.z;
+        sensor_data->vel_x = original_initialVelocity.axis.x;
+        sensor_data->vel_y = original_initialVelocity.axis.y;
+        sensor_data->vel_z = original_initialVelocity.axis.z;
         //
-        sensor_data->pos_x = initialPosition.axis.x;
-        sensor_data->pos_y = initialPosition.axis.y;
-        sensor_data->pos_z = initialPosition.axis.z;
+        sensor_data->pos_x = original_initialPosition.axis.x;
+        sensor_data->pos_y = original_initialPosition.axis.y;
+        sensor_data->pos_z = original_initialPosition.axis.z;
     }
 
     //
@@ -151,6 +196,14 @@ void AhrsCalculation::ResetInitial()
     initialPosition.axis.x = 0.0f;
     initialPosition.axis.y = 0.0f;
     initialPosition.axis.z = 0.0f;
+    //
+    original_initialVelocity.axis.x = 0.0f;
+    original_initialVelocity.axis.y = 0.0f;
+    original_initialVelocity.axis.z = 0.0f;
+    //
+    original_initialPosition.axis.x = 0.0f;
+    original_initialPosition.axis.y = 0.0f;
+    original_initialPosition.axis.z = 0.0f;
     //
     previousTimestamp = getMicrosecondTimestamp();
     //

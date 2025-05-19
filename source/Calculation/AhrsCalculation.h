@@ -46,9 +46,12 @@ public:
     FusionMatrix softIronMatrix = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     FusionVector hardIronOffset = { 0.0f, 0.0f, 0.0f };
     // 初始速度
-    FusionVector initialVelocity = { 0.0f, 0.0f, 0.0f };
+    FusionVector initialVelocity          = { 0.0f, 0.0f, 0.0f };
+    FusionVector original_initialVelocity = { 0.0f, 0.0f, 0.0f };
+
     // 初始位置
-    FusionVector initialPosition = { 0.0f, 0.0f, 0.0f };
+    FusionVector initialPosition          = { 0.0f, 0.0f, 0.0f };
+    FusionVector original_initialPosition = { 0.0f, 0.0f, 0.0f };
 public:
     int64_t start_time = 0;
     // Initialise algorithms
