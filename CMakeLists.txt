@@ -15,6 +15,7 @@ include_directories($ENV{FmDev}/source)
 include_directories($ENV{FmDev}/source/device)
 include_directories($ENV{FmDev}/source/device/TDK40607P)
 include_directories($ENV{FmDev}/libs/libgpiod/include)
+include_directories($ENV{FmDev}/libs/openkf/include)
 
 #
 # add_definitions(-DENABLE_LOGGING)
@@ -50,5 +51,6 @@ target_link_libraries(${app_name} PUBLIC
     nlohmann_json::nlohmann_json
     #
     $ENV{FmDev}/libs/libgpiod/lib/libgpiod.a
-    # Eigen3::Eigen
+    $ENV{FmDev}/libs/openkf/lib/libOpenKF.a
+    Eigen3::Eigen
 )

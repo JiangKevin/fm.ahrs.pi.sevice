@@ -3,7 +3,6 @@
 #pragma once
 //
 #include "Filtering/LowPass/LowPassFilter.h"
-#include "Filtering/kalman/ExtendedAccelerationKalmanFilter.h"
 #include "Fusion/Fusion.h"
 #include "concurrentqueue/concurrentqueue.h"
 #include "sensor_db.h"
@@ -69,10 +68,6 @@ public:
         .magneticRejection     = 10.0f,
         .recoveryTriggerPeriod = 5 * SAMPLE_RATE, /* 5 seconds */
     };
-    // 标准位置的磁力计数值
-
-    // 创建卡尔曼滤波对象，使用空构造函数
-    ExtendedAccelerationKalmanFilter akf;
 public:
     bool        SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data );
     void        ResetInitial();
@@ -82,9 +77,5 @@ public:
 private:
     bool calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt, bool is_lp, bool is_trapezoid );
     //
-    void filterAccelerationWithYawNoGravity( float ax, float ay, float az, float yaw, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z );
     void filterAccelerationWithMagAndLp( float ax, float ay, float az, float mx, float my, float mz, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z );
-    //
-    void UseKF( SENSOR_DB* sensor_data, float dt );
-    void initKF();
 };

@@ -7,8 +7,7 @@
 AhrsCalculation::AhrsCalculation()
 {
     ResetInitFusion();
-    //
-    initKF();
+
 }
 
 //
@@ -83,8 +82,6 @@ bool AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* ori
     sensor_data->eacc_y = earth.axis.y;
     sensor_data->eacc_z = earth.axis.z;
     //
-    // UseKF( sensor_data, deltaTime );
-    //
     if ( ! calculateSurfaceVelocity( sensor_data, deltaTime, true, true ) )
     {
         return false;
@@ -102,7 +99,6 @@ bool AhrsCalculation::calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt
         Eigen::Vector3f standard_mag( 27.25625f, 40.006248f, 57.081249f );
         Eigen::Vector3f pre_mag( sensor_data->mag_x, sensor_data->mag_y, sensor_data->mag_z );
         Eigen::Vector3f next_mag = pre_mag - standard_mag;
-        // filterAccelerationWithYawNoGravity( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z, sensor_data->yaw, out_x, out_y, out_z, 0.025f, 0.025f, 0.025f );
         filterAccelerationWithMagAndLp( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z, next_mag[ 0 ], next_mag[ 1 ], next_mag[ 2 ], out_x, out_y, out_z, 0.01, 0.015, 0.01 );
         //
         sensor_data->eacc_x = out_x;
