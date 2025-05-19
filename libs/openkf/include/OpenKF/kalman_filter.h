@@ -12,8 +12,8 @@
 #ifndef KALMAN_FILTER_LIB_H
 #define KALMAN_FILTER_LIB_H
 
-#include "motion_model/motion_model.h"
-#include "types.h"
+#include "OpenKF/motion_model.h"
+#include "OpenKF/types.h"
 
 namespace kf
 {

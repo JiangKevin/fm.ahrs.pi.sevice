@@ -4,8 +4,8 @@
 //
 #include "Filtering/LowPass/LowPassFilter.h"
 #include "Fusion/Fusion.h"
+#include "comput.h"
 #include "concurrentqueue/concurrentqueue.h"
-#include "sensor_db.h"
 #include <Eigen/Dense>
 #include <cctype>
 #include <chrono>
@@ -16,7 +16,6 @@
 #include <string>
 #include <sys/time.h>
 #include <vector>
-
 //
 #define SAMPLE_RATE ( 100 )  // replace this with actual sample rate
 
@@ -56,7 +55,6 @@ public:
     FusionOffset offset;
     FusionAhrs   ahrs;
     int64_t      previousTimestamp;
-    FusionVector previousAcceleration      = { 0.0f, 0.0f, 0.0f };
     bool         previousAcceleration_init = false;
     float        deltaTime;
     // Set AHRS algorithm settings
@@ -68,14 +66,22 @@ public:
         .magneticRejection     = 10.0f,
         .recoveryTriggerPeriod = 5 * SAMPLE_RATE, /* 5 seconds */
     };
+    //
+    // 创建 OpenKF 卡尔曼滤波器实例（线性卡尔曼滤波器）
+    kf::KalmanFilter< DIM_X, DIM_X > kf_filter;
+    // 全局过程噪声协方差矩阵（Q）
+    kf::Matrix< DIM_X, DIM_X > processNoise;
+    //
+    // EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    // Eigen::VectorXf previousAcceleration;
 public:
     bool        SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data );
+    bool        CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool is_efk );
     void        ResetInitial();
     void        ResetInitFusion();
     void        ConfigFusion( std::string content );
     std::string GetConfigString();
 private:
-    bool calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt, bool is_lp, bool is_trapezoid );
-    //
-    void filterAccelerationWithMagAndLp( float ax, float ay, float az, float mx, float my, float mz, float& out_ax, float& out_ay, float& out_az, float threshold_x, float threshold_y, float threshold_z );
+    void initEkf();
+    void runEkf( Eigen::Vector3f& netAcc, float dt, float& vx, float& vy, float& vz, float& px, float& py, float& pz );
 };
