@@ -34,7 +34,6 @@
 #define REEFWING_AHRS_H
 
 #include "ExtendedKalmanFilter.h"
-#include <Arduino.h>
 #include <Reefwing_imuTypes.h>
 
 /******************************************************************
