@@ -48,8 +48,8 @@ bool AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* ori
     // Print algorithm outputs
     auto              quate = FusionAhrsGetQuaternion( &ahrs );
     const FusionEuler euler = FusionQuaternionToEuler( quate );
-    // const FusionVector earth = FusionAhrsGetEarthAcceleration( &ahrs );
-    const FusionVector earth = FusionAhrsGetLinearAcceleration( &ahrs );
+    const FusionVector earth = FusionAhrsGetEarthAcceleration( &ahrs );
+    // const FusionVector earth = FusionAhrsGetLinearAcceleration( &ahrs );
     //
     original_sensor_data->quate_x = quate.element.x;
     original_sensor_data->quate_y = quate.element.y;
@@ -82,7 +82,7 @@ bool AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* ori
     sensor_data->eacc_y = earth.axis.y;
     sensor_data->eacc_z = earth.axis.z;
     //
-    if ( ! CalculateVelAndPos( sensor_data, deltaTime, false ) )
+    if ( ! CalculateVelAndPos( sensor_data, deltaTime, true ) )
     {
         return false;
     }
@@ -90,7 +90,7 @@ bool AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* ori
     return true;
 }
 //
-bool AhrsCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool is_efk )
+bool AhrsCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool is_gd )
 {
 
     //
@@ -101,7 +101,7 @@ bool AhrsCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool
         previousAcceleration_init = true;
     }
     //
-    if ( is_efk )
+    if ( is_gd )
     {
         Eigen::Vector3f acc( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z );
 
@@ -115,15 +115,29 @@ bool AhrsCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool
         {
             dalta_index = 0;
             //
-            runEkf( acc, dt, initialVelocity.axis.x, initialVelocity.axis.y, initialVelocity.axis.z, initialPosition.axis.x, initialPosition.axis.y, initialPosition.axis.z );
+            // 平滑函数处理当前数据（内部维护滑动窗口）
+            smoothAcceleration( sensor_data );
             //
-            sensor_data->vel_x = initialVelocity.axis.x;
-            sensor_data->vel_y = initialVelocity.axis.y;
-            sensor_data->vel_z = initialVelocity.axis.z;
+            Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
+            a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
+            auto ret_v = computeVelocityOfTrapezoid( dt, previousAcceleration, a_next );
             //
-            sensor_data->pos_x = initialPosition.axis.x;
-            sensor_data->pos_y = initialPosition.axis.y;
-            sensor_data->pos_z = initialPosition.axis.z;
+            previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
+            //
+            original_initialVelocity.axis.x += ret_v[ 0 ];
+            original_initialVelocity.axis.y += ret_v[ 1 ];
+            original_initialVelocity.axis.z += ret_v[ 2 ];
+            original_initialPosition.axis.x = original_initialPosition.axis.x + ( original_initialVelocity.axis.x * dt );
+            original_initialPosition.axis.y = original_initialPosition.axis.y + ( original_initialVelocity.axis.y * dt );
+            original_initialPosition.axis.z = original_initialPosition.axis.z + ( original_initialVelocity.axis.z * dt );
+            //
+            sensor_data->vel_x = original_initialVelocity.axis.x;
+            sensor_data->vel_y = original_initialVelocity.axis.y;
+            sensor_data->vel_z = original_initialVelocity.axis.z;
+            //
+            sensor_data->pos_x = original_initialPosition.axis.x;
+            sensor_data->pos_y = original_initialPosition.axis.y;
+            sensor_data->pos_z = original_initialPosition.axis.z;
         }
         else
         {
@@ -147,21 +161,35 @@ bool AhrsCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool
             }
             else
             {
+                // 平滑函数处理当前数据（内部维护滑动窗口）
+                smoothAcceleration( sensor_data );
                 //
-                runEkf( acc, dt, initialVelocity.axis.x, initialVelocity.axis.y, initialVelocity.axis.z, initialPosition.axis.x, initialPosition.axis.y, initialPosition.axis.z );
+                Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
+                a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
+                auto ret_v = computeVelocityOfTrapezoid( dt, previousAcceleration, a_next );
                 //
-                sensor_data->vel_x = initialVelocity.axis.x;
-                sensor_data->vel_y = initialVelocity.axis.y;
-                sensor_data->vel_z = initialVelocity.axis.z;
+                previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
                 //
-                sensor_data->pos_x = initialPosition.axis.x;
-                sensor_data->pos_y = initialPosition.axis.y;
-                sensor_data->pos_z = initialPosition.axis.z;
+                original_initialVelocity.axis.x += ret_v[ 0 ];
+                original_initialVelocity.axis.y += ret_v[ 1 ];
+                original_initialVelocity.axis.z += ret_v[ 2 ];
+                original_initialPosition.axis.x = original_initialPosition.axis.x + ( original_initialVelocity.axis.x * dt );
+                original_initialPosition.axis.y = original_initialPosition.axis.y + ( original_initialVelocity.axis.y * dt );
+                original_initialPosition.axis.z = original_initialPosition.axis.z + ( original_initialVelocity.axis.z * dt );
+                //
+                sensor_data->vel_x = original_initialVelocity.axis.x;
+                sensor_data->vel_y = original_initialVelocity.axis.y;
+                sensor_data->vel_z = original_initialVelocity.axis.z;
+                //
+                sensor_data->pos_x = original_initialPosition.axis.x;
+                sensor_data->pos_y = original_initialPosition.axis.y;
+                sensor_data->pos_z = original_initialPosition.axis.z;
             }
         }
     }
     else
     {
+        //
         Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
         a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
         auto ret_v = computeVelocityOfTrapezoid( dt, previousAcceleration, a_next );
@@ -171,6 +199,7 @@ bool AhrsCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool
         original_initialVelocity.axis.x += ret_v[ 0 ];
         original_initialVelocity.axis.y += ret_v[ 1 ];
         original_initialVelocity.axis.z += ret_v[ 2 ];
+        
         original_initialPosition.axis.x = original_initialPosition.axis.x + ( original_initialVelocity.axis.x * dt );
         original_initialPosition.axis.y = original_initialPosition.axis.y + ( original_initialVelocity.axis.y * dt );
         original_initialPosition.axis.z = original_initialPosition.axis.z + ( original_initialVelocity.axis.z * dt );

@@ -2,8 +2,9 @@
 //
 #pragma once
 //
+#include "Filtering/Gradient/gradient_descent.h"
 #include "Filtering/LowPass/LowPassFilter.h"
-#include "Fusion/Fusion.h"
+#include "XioTechnologiesFusion/Fusion.h"
 #include "comput.h"
 #include "concurrentqueue/concurrentqueue.h"
 #include <Eigen/Dense>
@@ -70,21 +71,12 @@ public:
         .recoveryTriggerPeriod = 5 * SAMPLE_RATE, /* 5 seconds */
     };
     //
-    // 创建 OpenKF 卡尔曼滤波器实例（线性卡尔曼滤波器）
-    kf::KalmanFilter< DIM_X, DIM_X > kf_filter;
-    // 全局过程噪声协方差矩阵（Q）
-    kf::Matrix< DIM_X, DIM_X > processNoise;
-    //
-    // EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    // Eigen::VectorXf previousAcceleration;
 public:
     bool        SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data );
-    bool        CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool is_efk );
+    bool        CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool is_gd );
     void        ResetInitial();
     void        ResetInitFusion();
     void        ConfigFusion( std::string content );
     std::string GetConfigString();
 private:
-    void initEkf();
-    void runEkf( Eigen::Vector3f& netAcc, float dt, float& vx, float& vy, float& vz, float& px, float& py, float& pz );
 };

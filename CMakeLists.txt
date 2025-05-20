@@ -17,6 +17,7 @@ include_directories($ENV{FmDev}/source/device/TDK40607P)
 include_directories($ENV{FmDev}/libs/libgpiod/include)
 include_directories($ENV{FmDev}/libs/openkf/include)
 
+
 #
 # add_definitions(-DENABLE_LOGGING)
 find_path(RAPIDCSV_INCLUDE_DIRS "rapidcsv.h")
