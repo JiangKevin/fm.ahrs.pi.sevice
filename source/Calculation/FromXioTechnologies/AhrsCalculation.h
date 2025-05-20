@@ -2,7 +2,7 @@
 //
 #pragma once
 //
-#include "XioTechnologiesFusion/Fusion.h"
+#include "Filtering/XioTechnologiesFusion/Fusion.h"
 #include "Calculation/comput.h"
 #include "concurrentqueue/concurrentqueue.h"
 #include <Eigen/Dense>
