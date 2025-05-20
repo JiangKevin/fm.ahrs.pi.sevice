@@ -34,8 +34,7 @@
 
 #ifndef REEFWING_IMUTYPES_H
 #define REEFWING_IMUTYPES_H
-
-#include <Arduino.h>
+#include <cstdint> 
 
 /******************************************************************
  *
@@ -64,32 +63,32 @@ struct EulerAngles
     float    yaw;     /* rotation around z axis in degrees */
     float    heading; /* rotation relative to magnetic north */
     float    rollRadians, pitchRadians, yawRadians;
-    uint32_t timeStamp;
+    int timeStamp;
 };
 
 struct InertialMessage
 {
     float    ax, ay, az;
     float    gx, gy, gz;
-    uint32_t timeStamp;
+    int32_t timeStamp;
 };
 
 struct RawData
 {
     int16_t  rx, ry, rz;
-    uint32_t timeStamp;
+    int32_t timeStamp;
 };
 
 struct ScaledData
 {
     float    sx, sy, sz;
-    uint32_t timeStamp;
+    int32_t timeStamp;
 };
 
 struct TempData
 {
     float    celsius;
-    uint32_t timeStamp;
+    int32_t timeStamp;
 };
 
 struct SensorData
@@ -97,7 +96,7 @@ struct SensorData
     float    ax, ay, az;
     float    gx, gy, gz;
     float    mx, my, mz;
-    uint32_t gTimeStamp, aTimeStamp, mTimeStamp;
+    int32_t gTimeStamp, aTimeStamp, mTimeStamp;
 };
 
 struct VectorData
@@ -125,7 +124,7 @@ public:
     void reset();
 
     float    q0, q1, q2, q3;  //  Euler Parameters
-    uint32_t timeStamp;
+    int32_t timeStamp;
 private:
     float radiansToDegrees( float radians );
 

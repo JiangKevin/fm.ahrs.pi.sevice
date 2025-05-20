@@ -32,8 +32,9 @@
 ******************************************************************/
 
 #include "ReefwingAHRS.h"
+#include <cstring>
 #include <math.h>
-
+#include <chrono>
 /******************************************************************
  *
  * Extended Kalman Filter utilities -
@@ -159,12 +160,12 @@ void ReefwingAHRS::begin()
 #elif defined( ARDUINO_SAMD_NANO_33_IOT )
     setBoardType( BoardType::NANO33IOT );
 #elif defined( BOARD_NAME )
-    if ( strncmp( BOARD_NAME, _boardTypeStr[ 5 ], 25 ) == 0 )
-    {
-        setBoardType( BoardType::XIAO_SENSE );
-        setImuType( ImuType::LSM6DS3 );
-        setDOF( DOF::DOF_6 );
-    }
+    // if ( strncmp( BOARD_NAME, _boardTypeStr[ 5 ], 25 ) == 0 )
+    // {
+    //     setBoardType( BoardType::XIAO_SENSE );
+    //     setImuType( ImuType::LSM6DS3 );
+    //     setDOF( DOF::DOF_6 );
+    // }
 #endif
 
     //  Default Sensor Fusion Co-Efficients - see README.md
@@ -235,7 +236,7 @@ void ReefwingAHRS::reset()
 
 void ReefwingAHRS::update()
 {
-    long  now    = micros();
+    long  now    = getMicroseconds();
     float deltaT = ( ( now - _lastUpdate ) / 1000000.0f );  // Time elapsed since last update in seconds
 
     _lastUpdate = now;

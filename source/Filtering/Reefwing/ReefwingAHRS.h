@@ -34,8 +34,8 @@
 #define REEFWING_AHRS_H
 
 #include "ExtendedKalmanFilter.h"
-#include <Reefwing_imuTypes.h>
-
+#include "Reefwing_imuTypes.h"
+#include <chrono>
 /******************************************************************
  *
  * Definitions -
@@ -137,6 +137,12 @@ public:
     void        formatAnglesForConfigurator();
     Quaternion  getQuaternion();
     EulerAngles angles, configAngles;
+    //
+    uint64_t getMicroseconds()
+    {
+        auto now = std::chrono::high_resolution_clock::now();
+        return std::chrono::time_point_cast< std::chrono::microseconds >( now ).time_since_epoch().count();
+    }
 private:
     long  _lastUpdate;  //  Time since last update in micro-seconds (us)
     float _declination;
