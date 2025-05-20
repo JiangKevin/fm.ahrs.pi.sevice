@@ -1,5 +1,5 @@
 #include "AhrsCalculation.h"
-#include "comput.h"
+#include "Calculation/comput.h"
 #include <cstdio>
 #include <time.h>
 //

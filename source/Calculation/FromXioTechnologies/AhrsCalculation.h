@@ -3,7 +3,7 @@
 #pragma once
 //
 #include "XioTechnologiesFusion/Fusion.h"
-#include "comput.h"
+#include "Calculation/comput.h"
 #include "concurrentqueue/concurrentqueue.h"
 #include <Eigen/Dense>
 #include <cctype>
