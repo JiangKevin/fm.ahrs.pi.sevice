@@ -2,8 +2,6 @@
 //
 #pragma once
 //
-#include "Filtering/Gradient/gradient_descent.h"
-#include "Filtering/LowPass/LowPassFilter.h"
 #include "XioTechnologiesFusion/Fusion.h"
 #include "comput.h"
 #include "concurrentqueue/concurrentqueue.h"

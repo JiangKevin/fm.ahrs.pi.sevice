@@ -115,8 +115,6 @@ bool AhrsCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool
         {
             dalta_index = 0;
             //
-            // 平滑函数处理当前数据（内部维护滑动窗口）
-            smoothAcceleration( sensor_data );
             //
             Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
             a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
@@ -161,8 +159,6 @@ bool AhrsCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool
             }
             else
             {
-                // 平滑函数处理当前数据（内部维护滑动窗口）
-                smoothAcceleration( sensor_data );
                 //
                 Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
                 a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
