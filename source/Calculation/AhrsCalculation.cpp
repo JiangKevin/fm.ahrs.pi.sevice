@@ -46,9 +46,10 @@ bool AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* ori
     FusionAhrsUpdate( &ahrs, gyroscope, accelerometer, magnetometer, deltaTime );
 
     // Print algorithm outputs
-    auto               quate = FusionAhrsGetQuaternion( &ahrs );
-    const FusionEuler  euler = FusionQuaternionToEuler( quate );
-    const FusionVector earth = FusionAhrsGetEarthAcceleration( &ahrs );
+    auto              quate = FusionAhrsGetQuaternion( &ahrs );
+    const FusionEuler euler = FusionQuaternionToEuler( quate );
+    // const FusionVector earth = FusionAhrsGetEarthAcceleration( &ahrs );
+    const FusionVector earth = FusionAhrsGetLinearAcceleration( &ahrs );
     //
     original_sensor_data->quate_x = quate.element.x;
     original_sensor_data->quate_y = quate.element.y;
@@ -81,7 +82,7 @@ bool AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* ori
     sensor_data->eacc_y = earth.axis.y;
     sensor_data->eacc_z = earth.axis.z;
     //
-    if ( ! CalculateVelAndPos( sensor_data, deltaTime, true ) )
+    if ( ! CalculateVelAndPos( sensor_data, deltaTime, false ) )
     {
         return false;
     }
@@ -128,9 +129,9 @@ bool AhrsCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool
         {
             dalta_index++;
             //
-            if ( dalta_index > 5 )
+            if ( dalta_index > 10 )
             {
-                dalta_index = 6;
+                dalta_index = 11;
                 //
                 sensor_data->eacc_x = 0.0f;
                 sensor_data->eacc_y = 0.0f;
