@@ -138,11 +138,11 @@ public:
     Quaternion  getQuaternion();
     EulerAngles angles, configAngles;
     //
-    uint64_t getMicroseconds()
+    int64_t getMicroseconds()
     {
         auto now = std::chrono::high_resolution_clock::now();
         return std::chrono::time_point_cast< std::chrono::microseconds >( now ).time_since_epoch().count();
-    }
+    };
 private:
     long  _lastUpdate;  //  Time since last update in micro-seconds (us)
     float _declination;

@@ -34,7 +34,7 @@
 
 #ifndef REEFWING_IMUTYPES_H
 #define REEFWING_IMUTYPES_H
-#include <cstdint> 
+#include <cstdint>
 
 /******************************************************************
  *
@@ -42,13 +42,13 @@
  *
  ******************************************************************/
 
-#define LSM9DS1AG_ADDRESS 0x6B  //  Address of accelerometer & gyroscope
-#define LSM9DS1M_ADDRESS  0x1E  //  Address of magnetometer
-#define HTS221_ADDRESS    0x5F  //  Nano 33 BLE Sense Rev 1 Sensor - temp/humidity
-#define HS3003_ADDRESS    0x44  //  Nano 33 BLE Sense Rev 2 Sensor - temp/humidity
-#define LSM6DS3_ADDRESS   0x6A  //  Seeed Studios xiao Sense gyro/accelerometer
-#define MPU6000_ADDRESS   0x68  //  TDK InvenSense MPU6x00 gyro/accelerometer
-#define MPU6050_ADDRESS   0x68  //  TDK InvenSense MPU6050 gyro/accelerometer
+// #define LSM9DS1AG_ADDRESS 0x6B  //  Address of accelerometer & gyroscope
+// #define LSM9DS1M_ADDRESS  0x1E  //  Address of magnetometer
+// #define HTS221_ADDRESS    0x5F  //  Nano 33 BLE Sense Rev 1 Sensor - temp/humidity
+// #define HS3003_ADDRESS    0x44  //  Nano 33 BLE Sense Rev 2 Sensor - temp/humidity
+// #define LSM6DS3_ADDRESS   0x6A  //  Seeed Studios xiao Sense gyro/accelerometer
+// #define MPU6000_ADDRESS   0x68  //  TDK InvenSense MPU6x00 gyro/accelerometer
+// #define MPU6050_ADDRESS   0x68  //  TDK InvenSense MPU6050 gyro/accelerometer
 
 /******************************************************************
  *
@@ -58,45 +58,45 @@
 
 struct EulerAngles
 {
-    float    roll;    /* rotation around x axis in degrees */
-    float    pitch;   /* rotation around y axis in degrees */
-    float    yaw;     /* rotation around z axis in degrees */
-    float    heading; /* rotation relative to magnetic north */
-    float    rollRadians, pitchRadians, yawRadians;
-    int timeStamp;
+    float roll;    /* rotation around x axis in degrees */
+    float pitch;   /* rotation around y axis in degrees */
+    float yaw;     /* rotation around z axis in degrees */
+    float heading; /* rotation relative to magnetic north */
+    float rollRadians, pitchRadians, yawRadians;
+    int   timeStamp;
 };
 
 struct InertialMessage
 {
-    float    ax, ay, az;
-    float    gx, gy, gz;
-    int32_t timeStamp;
+    float   ax, ay, az;
+    float   gx, gy, gz;
+    int64_t timeStamp;
 };
 
 struct RawData
 {
-    int16_t  rx, ry, rz;
-    int32_t timeStamp;
+    int16_t rx, ry, rz;
+    int64_t timeStamp;
 };
 
 struct ScaledData
 {
-    float    sx, sy, sz;
-    int32_t timeStamp;
+    float   sx, sy, sz;
+    int64_t timeStamp;
 };
 
 struct TempData
 {
-    float    celsius;
-    int32_t timeStamp;
+    float   celsius;
+    int64_t timeStamp;
 };
 
 struct SensorData
 {
-    float    ax, ay, az;
-    float    gx, gy, gz;
-    float    mx, my, mz;
-    int32_t gTimeStamp, aTimeStamp, mTimeStamp;
+    float   ax, ay, az;
+    float   gx, gy, gz;
+    float   mx, my, mz;
+    int64_t gTimeStamp, aTimeStamp, mTimeStamp;
 };
 
 struct VectorData
@@ -123,8 +123,8 @@ public:
 
     void reset();
 
-    float    q0, q1, q2, q3;  //  Euler Parameters
-    int32_t timeStamp;
+    float   q0, q1, q2, q3;  //  Euler Parameters
+    int64_t timeStamp;
 private:
     float radiansToDegrees( float radians );
 

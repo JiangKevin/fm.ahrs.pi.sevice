@@ -32,9 +32,9 @@
 ******************************************************************/
 
 #include "ReefwingAHRS.h"
+#include <chrono>
 #include <cstring>
 #include <math.h>
-#include <chrono>
 /******************************************************************
  *
  * Extended Kalman Filter utilities -
@@ -102,71 +102,6 @@ ReefwingAHRS::ReefwingAHRS()
 
 void ReefwingAHRS::begin()
 {
-    //  Detect Board Hardware & Associated IMU
-    setBoardType( BoardType::NOT_DEFINED );
-    setImuType( ImuType::UNKNOWN );
-    setDOF( DOF::DOF_6 );
-
-#if defined( ARDUINO_ARDUINO_NANO33BLE )  //  Nano 33 BLE found - 4 possible variants
-
-    byte error;
-
-    Wire1.begin();
-    Wire1.beginTransmission( HTS221_ADDRESS );
-    error = Wire1.endTransmission();
-
-    if ( error == 0 )
-    {
-        setBoardType( BoardType::NANO33BLE_SENSE_R1 );
-        setImuType( ImuType::LSM9DS1 );
-        setDOF( DOF::DOF_9 );
-    }
-    else
-    {
-        Wire1.beginTransmission( HS3003_ADDRESS );
-        error = Wire1.endTransmission();
-
-        if ( error == 0 )
-        {
-            setBoardType( BoardType::NANO33BLE_SENSE_R2 );
-            setImuType( ImuType::BMI270_BMM150 );
-            setDOF( DOF::DOF_9 );
-        }
-        else
-        {
-            Wire1.beginTransmission( LSM9DS1AG_ADDRESS );
-            error = Wire1.endTransmission();
-
-            if ( error == 0 )
-            {
-                setBoardType( BoardType::NANO33BLE );
-                setImuType( ImuType::LSM9DS1 );
-                setDOF( DOF::DOF_9 );
-            }
-            else
-            {
-                setBoardType( BoardType::NANO33BLE_R2 );
-                setImuType( ImuType::BMI270_BMM150 );
-                setDOF( DOF::DOF_9 );
-            }
-        }
-    }
-#elif defined( ARDUINO_AVR_NANO )
-    setBoardType( BoardType::NANO );
-#elif defined( ARDUINO_PORTENTA_H7_M7 )
-    setBoardType( BoardType::PORTENTA_H7 );
-#elif defined( ARDUINO_SAMD_MKRVIDOR4000 )
-    setBoardType( BoardType::VIDOR_4000 );
-#elif defined( ARDUINO_SAMD_NANO_33_IOT )
-    setBoardType( BoardType::NANO33IOT );
-#elif defined( BOARD_NAME )
-    // if ( strncmp( BOARD_NAME, _boardTypeStr[ 5 ], 25 ) == 0 )
-    // {
-    //     setBoardType( BoardType::XIAO_SENSE );
-    //     setImuType( ImuType::LSM6DS3 );
-    //     setDOF( DOF::DOF_6 );
-    // }
-#endif
 
     //  Default Sensor Fusion Co-Efficients - see README.md
     _gyroMeasError = 40.0f * DEG_TO_RAD;                    // gyroscope measurement error in rads/s (start at 40 deg/s)

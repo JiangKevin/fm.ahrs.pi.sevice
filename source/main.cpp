@@ -1,22 +1,23 @@
 //
+#include "Calculation/FromReefwing/reefwingCalculation.h"
 #include "Calculation/FromXioTechnologies/AhrsCalculation.h"
 #include "MMC56x3/MMC56x3.h"
 #include "TDK40607P/ICM42670P.h"
 #include "concurrentqueue/concurrentqueue.h"
 #include "g_fun.h"
 #include "websocket/websocket_server.hpp"
+#include <Filtering/Reefwing/ReefwingAHRS.h>
 #include <csignal>
 #include <iostream>
 #include <rapidcsv.h>
 #include <string>
 #include <string_view>
 #include <unistd.h>
-
 //
 rapidcsv::Document csv_doc_;
 WebSocketServer    server;
 AhrsCalculation    ahrs_calculation_;
-
+ReefwingAHRS       ahrs_reefwing;
 // 信号处理函数
 static void signalHandler_for_gloab( int signum )
 {
@@ -47,7 +48,9 @@ int main()
     //
     init_sensor( sensor_mmc_, sensor_imu_ );
     //
-    // server.handleSend
+    // ahrs_reefwing.begin();
+    // ahrs_reefwing.setFusionAlgorithm( SensorFusion::CLASSIC );
+    // ahrs_reefwing.setDeclination( 12.717 );  //  Sydney, AUSTRALIA
     //
     while ( server.running_ )
     {
@@ -70,6 +73,7 @@ int main()
         {
             start_dalta_index++;
             ahrs_calculation_.start_time = server.start_time;
+
             //
             bool read_ret = read_sensor_data( sensor_mmc_, sensor_imu_, sensor_data_, original_sensor_data_ );
             if ( read_ret )
@@ -78,6 +82,15 @@ int main()
                 {
                     start_dalta_index = 11;
                     //
+                    // SensorData sd;
+                    // cp_SENSORDB_2_SensorData( sensor_data_, sd );
+                    // ahrs_reefwing.setData( sd );
+                    // ahrs_reefwing.update();
+                    // //
+                    // sensor_data_.roll  = ahrs_reefwing.angles.roll;
+                    // sensor_data_.pitch = ahrs_reefwing.angles.pitch;
+                    // sensor_data_.yaw   = ahrs_reefwing.angles.yaw;
+
                     auto calcula_ret = ahrs_calculation_.SolveAnCalculation( &sensor_data_, &original_sensor_data_ );
                     //
                     if ( calcula_ret )

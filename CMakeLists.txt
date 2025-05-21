@@ -10,6 +10,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $ENV{FmDev}/bin)
 # C++17 is required for this project.
 set(CMAKE_CXX_STANDARD 20)
 
+# 添加编译选项
+add_compile_options(
+    -Wnarrowing 
+)
+
 #
 include_directories($ENV{FmDev}/source)
 include_directories($ENV{FmDev}/source/device)
