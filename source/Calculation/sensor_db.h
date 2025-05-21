@@ -191,4 +191,34 @@ struct SENSOR_DB
             deltaTime = std::stof( values[ 26 ] );
         }
     }
+    //
+    void ToZero()
+    {
+        acc_x     = 0.0f;
+        acc_y     = 0.0f;
+        acc_z     = 0.0f;
+        gyro_x    = 0.0f;
+        gyro_y    = 0.0f;
+        gyro_z    = 0.0f;
+        mag_x     = 0.0f;
+        mag_y     = 0.0f;
+        mag_z     = 0.0f;
+        quate_x   = 0.0f;
+        quate_y   = 0.0f;
+        quate_z   = 0.0f;
+        quate_w   = 0.0f;
+        roll      = 0.0f;
+        pitch     = 0.0f;
+        yaw       = 0.0f;
+        eacc_x    = 0.0f;
+        eacc_y    = 0.0f;
+        eacc_z    = 0.0f;
+        vel_x     = 0.0f;
+        vel_y     = 0.0f;
+        vel_z     = 0.0f;
+        pos_x     = 0.0f;
+        pos_y     = 0.0f;
+        pos_z     = 0.0f;
+        deltaTime = 0.0f;
+    }
 };

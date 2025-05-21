@@ -2,8 +2,8 @@
 //
 #pragma once
 //
-#include "Filtering/XioTechnologiesFusion/Fusion.h"
 #include "Calculation/comput.h"
+#include "Filtering/XioTechnologiesFusion/Fusion.h"
 #include "concurrentqueue/concurrentqueue.h"
 #include <Eigen/Dense>
 #include <cctype>
@@ -44,13 +44,13 @@ public:
     //
     FusionMatrix softIronMatrix = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     FusionVector hardIronOffset = { 0.0f, 0.0f, 0.0f };
-    // 初始速度
-    FusionVector initialVelocity          = { 0.0f, 0.0f, 0.0f };
-    FusionVector original_initialVelocity = { 0.0f, 0.0f, 0.0f };
+    // // 初始速度
+    // FusionVector initialVelocity          = { 0.0f, 0.0f, 0.0f };
+    // FusionVector original_initialVelocity = { 0.0f, 0.0f, 0.0f };
 
-    // 初始位置
-    FusionVector initialPosition          = { 0.0f, 0.0f, 0.0f };
-    FusionVector original_initialPosition = { 0.0f, 0.0f, 0.0f };
+    // // 初始位置
+    // FusionVector initialPosition          = { 0.0f, 0.0f, 0.0f };
+    // FusionVector original_initialPosition = { 0.0f, 0.0f, 0.0f };
 public:
     int64_t start_time = 0;
     // Initialise algorithms
@@ -71,7 +71,7 @@ public:
     //
 public:
     bool        SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data );
-    bool        CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool is_gd );
+    bool        CalculateVelAndPos( SENSOR_DB* sensor_data, float dt );
     void        ResetInitial();
     void        ResetInitFusion();
     void        ConfigFusion( std::string content );

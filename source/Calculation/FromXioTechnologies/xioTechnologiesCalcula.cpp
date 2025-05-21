@@ -1,5 +1,5 @@
-#include "xioTechnologiesCalculation.h"
 #include "Calculation/comput.h"
+#include "xioTechnologiesCalculation.h"
 #include <cstdio>
 #include <time.h>
 //
@@ -46,8 +46,8 @@ bool xioTechnologiesCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SEN
     FusionAhrsUpdate( &ahrs, gyroscope, accelerometer, magnetometer, deltaTime );
 
     // Print algorithm outputs
-    auto              quate = FusionAhrsGetQuaternion( &ahrs );
-    const FusionEuler euler = FusionQuaternionToEuler( quate );
+    auto               quate = FusionAhrsGetQuaternion( &ahrs );
+    const FusionEuler  euler = FusionQuaternionToEuler( quate );
     const FusionVector earth = FusionAhrsGetEarthAcceleration( &ahrs );
     // const FusionVector earth = FusionAhrsGetLinearAcceleration( &ahrs );
     //
@@ -64,7 +64,7 @@ bool xioTechnologiesCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SEN
     original_sensor_data->eacc_y = earth.axis.y;
     original_sensor_data->eacc_z = earth.axis.z;
     //
-    if ( ! CalculateVelAndPos( original_sensor_data, deltaTime, false ) )
+    if ( ! CalculateVelAndPos( original_sensor_data, deltaTime ) )
     {
         return false;
     }
@@ -82,7 +82,7 @@ bool xioTechnologiesCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SEN
     sensor_data->eacc_y = earth.axis.y;
     sensor_data->eacc_z = earth.axis.z;
     //
-    if ( ! CalculateVelAndPos( sensor_data, deltaTime, true ) )
+    if ( ! CalculateVelAndPos( sensor_data, deltaTime ) )
     {
         return false;
     }
@@ -90,7 +90,7 @@ bool xioTechnologiesCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SEN
     return true;
 }
 //
-bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool is_gd )
+bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt )
 {
 
     //
@@ -101,90 +101,18 @@ bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, flo
         previousAcceleration_init = true;
     }
     //
-    if ( is_gd )
-    {
-        Eigen::Vector3f acc( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z );
 
-        // 为每个轴设置不同的阈值
-        Eigen::Vector3f axesThreshold( 0.03f, 0.05f, 0.2f );
-        //
-        auto is_quiescence = isStationary( acc, axesThreshold );
-        printf( "is_quiescence: %d , dalta_index: %d \n", is_quiescence, dalta_index );
-        //
-        if ( ! is_quiescence )
-        {
-            dalta_index = 0;
-            //
-            //
-            Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
-            a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
-            auto ret_v = computeVelocityOfTrapezoid( dt, previousAcceleration, a_next );
-            //
-            previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
-            //
-            original_initialVelocity.axis.x += ret_v[ 0 ];
-            original_initialVelocity.axis.y += ret_v[ 1 ];
-            original_initialVelocity.axis.z += ret_v[ 2 ];
-            original_initialPosition.axis.x = original_initialPosition.axis.x + ( original_initialVelocity.axis.x * dt );
-            original_initialPosition.axis.y = original_initialPosition.axis.y + ( original_initialVelocity.axis.y * dt );
-            original_initialPosition.axis.z = original_initialPosition.axis.z + ( original_initialVelocity.axis.z * dt );
-            //
-            sensor_data->vel_x = original_initialVelocity.axis.x;
-            sensor_data->vel_y = original_initialVelocity.axis.y;
-            sensor_data->vel_z = original_initialVelocity.axis.z;
-            //
-            sensor_data->pos_x = original_initialPosition.axis.x;
-            sensor_data->pos_y = original_initialPosition.axis.y;
-            sensor_data->pos_z = original_initialPosition.axis.z;
-        }
-        else
-        {
-            dalta_index++;
-            //
-            if ( dalta_index > 10 )
-            {
-                dalta_index = 11;
-                //
-                sensor_data->eacc_x = 0.0f;
-                sensor_data->eacc_y = 0.0f;
-                sensor_data->eacc_z = 0.0f;
-                //
-                sensor_data->vel_x = 0.0f;
-                sensor_data->vel_y = 0.0f;
-                sensor_data->vel_z = 0.0f;
-                //
-                sensor_data->pos_x = initialPosition.axis.x;
-                sensor_data->pos_y = initialPosition.axis.y;
-                sensor_data->pos_z = initialPosition.axis.z;
-            }
-            else
-            {
-                //
-                Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
-                a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
-                auto ret_v = computeVelocityOfTrapezoid( dt, previousAcceleration, a_next );
-                //
-                previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
-                //
-                original_initialVelocity.axis.x += ret_v[ 0 ];
-                original_initialVelocity.axis.y += ret_v[ 1 ];
-                original_initialVelocity.axis.z += ret_v[ 2 ];
-                original_initialPosition.axis.x = original_initialPosition.axis.x + ( original_initialVelocity.axis.x * dt );
-                original_initialPosition.axis.y = original_initialPosition.axis.y + ( original_initialVelocity.axis.y * dt );
-                original_initialPosition.axis.z = original_initialPosition.axis.z + ( original_initialVelocity.axis.z * dt );
-                //
-                sensor_data->vel_x = original_initialVelocity.axis.x;
-                sensor_data->vel_y = original_initialVelocity.axis.y;
-                sensor_data->vel_z = original_initialVelocity.axis.z;
-                //
-                sensor_data->pos_x = original_initialPosition.axis.x;
-                sensor_data->pos_y = original_initialPosition.axis.y;
-                sensor_data->pos_z = original_initialPosition.axis.z;
-            }
-        }
-    }
-    else
+    Eigen::Vector3f acc( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z );
+
+    // 为每个轴设置不同的阈值
+    Eigen::Vector3f axesThreshold( 0.03f, 0.05f, 0.2f );
+    //
+    auto is_quiescence = isStationary( acc, axesThreshold );
+    printf( "is_quiescence: %d , dalta_index: %d \n", is_quiescence, dalta_index );
+    //
+    if ( ! is_quiescence )
     {
+        dalta_index = 0;
         //
         Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
         a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
@@ -192,21 +120,47 @@ bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, flo
         //
         previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
         //
-        original_initialVelocity.axis.x += ret_v[ 0 ];
-        original_initialVelocity.axis.y += ret_v[ 1 ];
-        original_initialVelocity.axis.z += ret_v[ 2 ];
-        
-        original_initialPosition.axis.x = original_initialPosition.axis.x + ( original_initialVelocity.axis.x * dt );
-        original_initialPosition.axis.y = original_initialPosition.axis.y + ( original_initialVelocity.axis.y * dt );
-        original_initialPosition.axis.z = original_initialPosition.axis.z + ( original_initialVelocity.axis.z * dt );
+        sensor_data->vel_x += ret_v[ 0 ];
+        sensor_data->vel_y += ret_v[ 1 ];
+        sensor_data->vel_z += ret_v[ 2 ];
+
+        sensor_data->pos_x += ( sensor_data->vel_x * dt );
+        sensor_data->pos_y += ( sensor_data->vel_y * dt );
+        sensor_data->pos_z += ( sensor_data->vel_z * dt );
+    }
+    else
+    {
+        dalta_index++;
         //
-        sensor_data->vel_x = original_initialVelocity.axis.x;
-        sensor_data->vel_y = original_initialVelocity.axis.y;
-        sensor_data->vel_z = original_initialVelocity.axis.z;
-        //
-        sensor_data->pos_x = original_initialPosition.axis.x;
-        sensor_data->pos_y = original_initialPosition.axis.y;
-        sensor_data->pos_z = original_initialPosition.axis.z;
+        if ( dalta_index > 10 )
+        {
+            dalta_index = 11;
+            //
+            sensor_data->eacc_x = 0.0f;
+            sensor_data->eacc_y = 0.0f;
+            sensor_data->eacc_z = 0.0f;
+            //
+            sensor_data->vel_x = 0.0f;
+            sensor_data->vel_y = 0.0f;
+            sensor_data->vel_z = 0.0f;
+        }
+        else
+        {
+            //
+            Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
+            a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
+            auto ret_v = computeVelocityOfTrapezoid( dt, previousAcceleration, a_next );
+            //
+            previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
+            //
+            sensor_data->vel_x += ret_v[ 0 ];
+            sensor_data->vel_y += ret_v[ 1 ];
+            sensor_data->vel_z += ret_v[ 2 ];
+
+            sensor_data->pos_x += ( sensor_data->vel_x * dt );
+            sensor_data->pos_y += ( sensor_data->vel_y * dt );
+            sensor_data->pos_z += ( sensor_data->vel_z * dt );
+        }
     }
 
     //
@@ -215,21 +169,6 @@ bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, flo
 //
 void xioTechnologiesCalculation::ResetInitial()
 {
-    initialVelocity.axis.x = 0.0f;
-    initialVelocity.axis.y = 0.0f;
-    initialVelocity.axis.z = 0.0f;
-    //
-    initialPosition.axis.x = 0.0f;
-    initialPosition.axis.y = 0.0f;
-    initialPosition.axis.z = 0.0f;
-    //
-    original_initialVelocity.axis.x = 0.0f;
-    original_initialVelocity.axis.y = 0.0f;
-    original_initialVelocity.axis.z = 0.0f;
-    //
-    original_initialPosition.axis.x = 0.0f;
-    original_initialPosition.axis.y = 0.0f;
-    original_initialPosition.axis.z = 0.0f;
     //
     previousTimestamp = getMicrosecondTimestamp();
     //

@@ -55,6 +55,8 @@ int main()
             index    = 0;
             init_out_csv( csv_doc_ );
             //
+            sensor_data_.ToZero();
+            original_sensor_data_.ToZero();
             ahrs_calculation_.ResetInitFusion();
             ahrs_calculation_.ResetInitial();
             init_sensor( sensor_mmc_, sensor_imu_ );
@@ -112,6 +114,8 @@ int main()
             index    = 0;
             init_out_csv( csv_doc_ );
             //
+            sensor_data_.ToZero();
+            original_sensor_data_.ToZero();
             ahrs_calculation_.ResetInitial();
             init_sensor( sensor_mmc_, sensor_imu_ );
             server.commond_   = "Start";
