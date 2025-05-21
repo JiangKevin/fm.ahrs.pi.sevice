@@ -27,11 +27,11 @@ struct MotionData
     std::vector< float > displacement;
 };
 //
-class AhrsCalculation
+class xioTechnologiesCalculation
 {
 public:
-    AhrsCalculation();
-    ~AhrsCalculation(){};
+    xioTechnologiesCalculation();
+    ~xioTechnologiesCalculation(){};
 public:
     // Define calibration (replace with actual calibration data if available)
     FusionMatrix gyroscopeMisalignment = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };

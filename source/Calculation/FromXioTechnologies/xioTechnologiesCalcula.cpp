@@ -1,16 +1,16 @@
-#include "AhrsCalculation.h"
+#include "xioTechnologiesCalculation.h"
 #include "Calculation/comput.h"
 #include <cstdio>
 #include <time.h>
 //
 // 带 Context* 参数的构造函数实现
-AhrsCalculation::AhrsCalculation()
+xioTechnologiesCalculation::xioTechnologiesCalculation()
 {
     ResetInitFusion();
 }
 
 //
-bool AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data )
+bool xioTechnologiesCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data )
 {
     float elapsed_time = ( float )( getMicrosecondTimestamp() - start_time ) / ( float )CLOCKS_PER_SEC;
     // Acquire latest sensor data
@@ -90,7 +90,7 @@ bool AhrsCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* ori
     return true;
 }
 //
-bool AhrsCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool is_gd )
+bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool is_gd )
 {
 
     //
@@ -213,7 +213,7 @@ bool AhrsCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool
     return true;
 }
 //
-void AhrsCalculation::ResetInitial()
+void xioTechnologiesCalculation::ResetInitial()
 {
     initialVelocity.axis.x = 0.0f;
     initialVelocity.axis.y = 0.0f;
@@ -236,7 +236,7 @@ void AhrsCalculation::ResetInitial()
     previousAcceleration_init = false;
 }
 //
-void AhrsCalculation::ResetInitFusion()
+void xioTechnologiesCalculation::ResetInitFusion()
 {
     FusionOffsetInitialise( &offset, SAMPLE_RATE );
     FusionAhrsInitialise( &ahrs );
@@ -248,7 +248,7 @@ void AhrsCalculation::ResetInitFusion()
     previousAcceleration_init = false;
 }
 //
-void AhrsCalculation::ConfigFusion( std::string content )
+void xioTechnologiesCalculation::ConfigFusion( std::string content )
 {
     char delimiter = ',';
     auto values    = splitString( content, delimiter );
@@ -320,7 +320,7 @@ void AhrsCalculation::ConfigFusion( std::string content )
     }
 }
 //
-std::string AhrsCalculation::GetConfigString()
+std::string xioTechnologiesCalculation::GetConfigString()
 {
     std::string content_str = "Setup";
     //
@@ -380,4 +380,4 @@ std::string AhrsCalculation::GetConfigString()
 }
 
 //
-#include "AhrsCalculation.inl"
+#include "xioTechnologiesCalculation.inl"
