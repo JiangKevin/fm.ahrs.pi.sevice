@@ -55,7 +55,7 @@ public:
     // Set AHRS algorithm settings
     FusionAhrsSettings settings = {
         .convention            = FusionConventionEnu,
-        .gain                  = 0.5f,
+        .gain                  = 20.0f,
         .gyroscopeRange        = 2000.0f, /* replace this with actual gyroscope range in degrees/s */
         .accelerationRejection = 10.0f,
         .magneticRejection     = 10.0f,
@@ -64,7 +64,7 @@ public:
     //
 public:
     bool        SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data );
-    bool        CalculateVelAndPos( SENSOR_DB* sensor_data, float dt );
+    bool        CalculateVelAndPos( SENSOR_DB* sensor_data, float dt ,bool is_hp);
     void        ResetInitial();
     void        ResetInitFusion();
     void        ConfigFusion( std::string content );

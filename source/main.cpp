@@ -12,6 +12,7 @@
 #include <unistd.h>
 //
 rapidcsv::Document         csv_doc_;
+rapidcsv::Document         read_csv_doc_( "data.csv" );
 WebSocketServer            server;
 xioTechnologiesCalculation ahrs_calculation_;
 // 信号处理函数
@@ -26,6 +27,7 @@ static void signalHandler_for_gloab( int signum )
 //
 int main()
 {
+
     server.setPort( port );
     server.start();
     server.str_fusion_config = ahrs_calculation_.GetConfigString();
@@ -62,6 +64,21 @@ int main()
             init_sensor( sensor_mmc_, sensor_imu_ );
             server.commond_   = "";
             start_dalta_index = 0;
+        }
+        else if ( startsWith( server.commond_, "ReadCsv" ) )
+        {
+            static int row_index = 0;
+            //
+            auto ret = read_csv_by_index( row_index, read_csv_doc_, sensor_data_ );
+            //
+            if ( ret )
+            {
+                std::string command = "AfterCalculation:";
+                command += sensor_data_.to_string();
+                // printf("%s\n",command.c_str());
+                server.handleSend( command );
+            }
+            //
         }
         else if ( startsWith( server.commond_, "Start" ) )
         {

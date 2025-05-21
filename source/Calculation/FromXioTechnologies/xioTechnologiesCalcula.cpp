@@ -65,7 +65,7 @@ bool xioTechnologiesCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SEN
     original_sensor_data->eacc_z = earth.axis.z;
 
     //
-    if ( ! CalculateVelAndPos( original_sensor_data, deltaTime ) )
+    if ( ! CalculateVelAndPos( original_sensor_data, deltaTime, false ) )
     {
         return false;
     }
@@ -82,10 +82,11 @@ bool xioTechnologiesCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SEN
     sensor_data->eacc_x = earth.axis.x;
     sensor_data->eacc_y = earth.axis.y;
     sensor_data->eacc_z = earth.axis.z;
+
     // 自定义方法计算线性加速度
-    getLinearAccFromSd( sensor_data );
+    // getLinearAccFromSd( sensor_data );
     //
-    if ( ! CalculateVelAndPos( sensor_data, deltaTime ) )
+    if ( ! CalculateVelAndPos( sensor_data, deltaTime, true ) )
     {
         return false;
     }
@@ -93,7 +94,7 @@ bool xioTechnologiesCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SEN
     return true;
 }
 //
-bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt )
+bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool is_hp )
 {
 
     //
@@ -109,7 +110,16 @@ bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, flo
 
     // 为每个轴设置不同的阈值
     // Eigen::Vector3f axesThreshold( 0.03f, 0.05f, 0.2f );
-    Eigen::Vector3f axesThreshold( 0.05f, 0.2f, 0.15f );
+    Eigen::Vector3f axesThreshold( 3 );
+    if ( is_hp )
+    {
+        axesThreshold << 0.05f, 0.2f, 0.15f;
+    }
+    else
+    {
+        axesThreshold << 0.0f, 0.0f, 0.0f;
+    }
+
     //
     auto is_quiescence = isStationary( acc, axesThreshold );
     printf( "is_quiescence: %d , dalta_index: %d \n", is_quiescence, dalta_index );
@@ -121,6 +131,7 @@ bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, flo
         Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
         a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
         auto ret_v = computeVelocityOfTrapezoid( dt, previousAcceleration, a_next );
+        //
         //
         previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
         //
@@ -154,6 +165,7 @@ bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, flo
             Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
             a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
             auto ret_v = computeVelocityOfTrapezoid( dt, previousAcceleration, a_next );
+            //
             //
             previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
             //

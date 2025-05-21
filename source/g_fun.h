@@ -95,6 +95,48 @@ static void update_out_csv( int& index, rapidcsv::Document& csv_doc, const SENSO
     index++;
 }
 //
+static bool read_csv_by_index( int& index, rapidcsv::Document& csv_doc, SENSOR_DB& sensor_data )
+{
+    int count = csv_doc.GetColumn< int64_t >( "Time (s)" ).size();
+    //
+    if ( index < count )
+    {
+        sensor_data.time      = csv_doc.GetCell< int64_t >( 0, index );
+        sensor_data.gyro_x    = csv_doc.GetCell< float >( 1, index );
+        sensor_data.gyro_y    = csv_doc.GetCell< float >( 2, index );
+        sensor_data.gyro_z    = csv_doc.GetCell< float >( 3, index );
+        sensor_data.acc_x     = csv_doc.GetCell< float >( 4, index );
+        sensor_data.acc_y     = csv_doc.GetCell< float >( 5, index );
+        sensor_data.acc_z     = csv_doc.GetCell< float >( 6, index );
+        sensor_data.mag_x     = csv_doc.GetCell< float >( 7, index );
+        sensor_data.mag_y     = csv_doc.GetCell< float >( 8, index );
+        sensor_data.mag_z     = csv_doc.GetCell< float >( 9, index );
+        sensor_data.quate_x   = csv_doc.GetCell< float >( 10, index );
+        sensor_data.quate_y   = csv_doc.GetCell< float >( 11, index );
+        sensor_data.quate_z   = csv_doc.GetCell< float >( 12, index );
+        sensor_data.quate_w   = csv_doc.GetCell< float >( 13, index );
+        sensor_data.roll      = csv_doc.GetCell< float >( 14, index );
+        sensor_data.pitch     = csv_doc.GetCell< float >( 15, index );
+        sensor_data.yaw       = csv_doc.GetCell< float >( 16, index );
+        sensor_data.eacc_x    = csv_doc.GetCell< float >( 17, index );
+        sensor_data.eacc_y    = csv_doc.GetCell< float >( 18, index );
+        sensor_data.eacc_z    = csv_doc.GetCell< float >( 19, index );
+        sensor_data.vel_x     = csv_doc.GetCell< float >( 20, index );
+        sensor_data.vel_y     = csv_doc.GetCell< float >( 21, index );
+        sensor_data.vel_z     = csv_doc.GetCell< float >( 22, index );
+        sensor_data.pos_x     = csv_doc.GetCell< float >( 23, index );
+        sensor_data.pos_y     = csv_doc.GetCell< float >( 24, index );
+        sensor_data.pos_z     = csv_doc.GetCell< float >( 25, index );
+        sensor_data.deltaTime = csv_doc.GetCell< float >( 26, index );
+        //
+        index++;
+        //
+        return true;
+    }
+    //
+    return false;
+}
+//
 static void close_out_csv( rapidcsv::Document& csv_doc )
 {
     try
