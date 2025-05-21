@@ -5,12 +5,12 @@
  */
 
 #ifndef FUSION_CALIBRATION_H
-#define FUSION_CALIBRATION_H
+    #define FUSION_CALIBRATION_H
 
 //------------------------------------------------------------------------------
 // Includes
 
-#include "FusionMath.h"
+    #include "FusionMath.h"
 
 //------------------------------------------------------------------------------
 // Inline functions
@@ -23,8 +23,9 @@
  * @param offset Offset.
  * @return Calibrated measurement.
  */
-static inline FusionVector FusionCalibrationInertial(const FusionVector uncalibrated, const FusionMatrix misalignment, const FusionVector sensitivity, const FusionVector offset) {
-    return FusionMatrixMultiplyVector(misalignment, FusionVectorHadamardProduct(FusionVectorSubtract(uncalibrated, offset), sensitivity));
+static inline FusionVector FusionCalibrationInertial( const FusionVector uncalibrated, const FusionMatrix misalignment, const FusionVector sensitivity, const FusionVector offset )
+{
+    return FusionMatrixMultiplyVector( misalignment, FusionVectorHadamardProduct( FusionVectorSubtract( uncalibrated, offset ), sensitivity ) );
 }
 
 /**
@@ -34,8 +35,9 @@ static inline FusionVector FusionCalibrationInertial(const FusionVector uncalibr
  * @param hardIronOffset Hard-iron offset.
  * @return Calibrated measurement.
  */
-static inline FusionVector FusionCalibrationMagnetic(const FusionVector uncalibrated, const FusionMatrix softIronMatrix, const FusionVector hardIronOffset) {
-    return FusionMatrixMultiplyVector(softIronMatrix, FusionVectorSubtract(uncalibrated, hardIronOffset));
+static inline FusionVector FusionCalibrationMagnetic( const FusionVector uncalibrated, const FusionMatrix softIronMatrix, const FusionVector hardIronOffset )
+{
+    return FusionMatrixMultiplyVector( softIronMatrix, FusionVectorSubtract( uncalibrated, hardIronOffset ) );
 }
 
 #endif

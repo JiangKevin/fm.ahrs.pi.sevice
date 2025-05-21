@@ -6,26 +6,26 @@
  */
 
 #ifndef FUSION_H
-#define FUSION_H
+    #define FUSION_H
 
 //------------------------------------------------------------------------------
 // Includes
 
-#ifdef __cplusplus
+    #ifdef __cplusplus
 extern "C" {
-#endif
+    #endif
 
-#include "FusionAhrs.h"
-#include "FusionAxes.h"
-#include "FusionCalibration.h"
-#include "FusionCompass.h"
-#include "FusionConvention.h"
-#include "FusionMath.h"
-#include "FusionOffset.h"
+    #include "FusionAhrs.h"
+    #include "FusionAxes.h"
+    #include "FusionCalibration.h"
+    #include "FusionCompass.h"
+    #include "FusionConvention.h"
+    #include "FusionMath.h"
+    #include "FusionOffset.h"
 
-#ifdef __cplusplus
+    #ifdef __cplusplus
 }
-#endif
+    #endif
 
 #endif
 //------------------------------------------------------------------------------

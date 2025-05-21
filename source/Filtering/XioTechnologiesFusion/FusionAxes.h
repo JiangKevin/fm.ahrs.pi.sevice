@@ -5,12 +5,12 @@
  */
 
 #ifndef FUSION_AXES_H
-#define FUSION_AXES_H
+    #define FUSION_AXES_H
 
 //------------------------------------------------------------------------------
 // Includes
 
-#include "FusionMath.h"
+    #include "FusionMath.h"
 
 //------------------------------------------------------------------------------
 // Definitions
@@ -21,7 +21,8 @@
  * body Y axis is aligned with sensor X axis but pointing the opposite direction
  * then alignment is +Y-X+Z.
  */
-typedef enum {
+typedef enum
+{
     FusionAxesAlignmentPXPYPZ, /* +X+Y+Z */
     FusionAxesAlignmentPXNZPY, /* +X-Z+Y */
     FusionAxesAlignmentPXNYNZ, /* +X-Y-Z */
@@ -57,9 +58,11 @@ typedef enum {
  * @param alignment Axes alignment.
  * @return Sensor axes aligned with the body axes.
  */
-static inline FusionVector FusionAxesSwap(const FusionVector sensor, const FusionAxesAlignment alignment) {
+static inline FusionVector FusionAxesSwap( const FusionVector sensor, const FusionAxesAlignment alignment )
+{
     FusionVector result;
-    switch (alignment) {
+    switch ( alignment )
+    {
         case FusionAxesAlignmentPXPYPZ:
             break;
         case FusionAxesAlignmentPXNZPY:
@@ -178,7 +181,7 @@ static inline FusionVector FusionAxesSwap(const FusionVector sensor, const Fusio
             result.axis.z = -sensor.axis.y;
             return result;
     }
-    return sensor; // avoid compiler warning
+    return sensor;  // avoid compiler warning
 }
 
 #endif

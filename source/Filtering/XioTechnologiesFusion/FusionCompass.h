@@ -6,18 +6,18 @@
  */
 
 #ifndef FUSION_COMPASS_H
-#define FUSION_COMPASS_H
+    #define FUSION_COMPASS_H
 
 //------------------------------------------------------------------------------
 // Includes
 
-#include "FusionConvention.h"
-#include "FusionMath.h"
+    #include "FusionConvention.h"
+    #include "FusionMath.h"
 
 //------------------------------------------------------------------------------
 // Function declarations
 
-float FusionCompassCalculateHeading(const FusionConvention convention, const FusionVector accelerometer, const FusionVector magnetometer);
+float FusionCompassCalculateHeading( const FusionConvention convention, const FusionVector accelerometer, const FusionVector magnetometer );
 
 #endif
 

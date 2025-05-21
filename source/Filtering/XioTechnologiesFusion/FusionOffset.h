@@ -6,12 +6,12 @@
  */
 
 #ifndef FUSION_OFFSET_H
-#define FUSION_OFFSET_H
+    #define FUSION_OFFSET_H
 
 //------------------------------------------------------------------------------
 // Includes
 
-#include "FusionMath.h"
+    #include "FusionMath.h"
 
 //------------------------------------------------------------------------------
 // Definitions
@@ -20,8 +20,9 @@
  * @brief Gyroscope offset algorithm structure.  Structure members are used
  * internally and must not be accessed by the application.
  */
-typedef struct {
-    float filterCoefficient;
+typedef struct
+{
+    float        filterCoefficient;
     unsigned int timeout;
     unsigned int timer;
     FusionVector gyroscopeOffset;
@@ -30,9 +31,9 @@ typedef struct {
 //------------------------------------------------------------------------------
 // Function declarations
 
-void FusionOffsetInitialise(FusionOffset *const offset, const unsigned int sampleRate);
+void FusionOffsetInitialise( FusionOffset* const offset, const unsigned int sampleRate );
 
-FusionVector FusionOffsetUpdate(FusionOffset *const offset, FusionVector gyroscope);
+FusionVector FusionOffsetUpdate( FusionOffset* const offset, FusionVector gyroscope );
 
 #endif
 
