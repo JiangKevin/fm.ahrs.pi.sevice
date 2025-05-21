@@ -63,6 +63,7 @@ bool xioTechnologiesCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SEN
     original_sensor_data->eacc_x = earth.axis.x;
     original_sensor_data->eacc_y = earth.axis.y;
     original_sensor_data->eacc_z = earth.axis.z;
+
     //
     if ( ! CalculateVelAndPos( original_sensor_data, deltaTime ) )
     {
@@ -81,6 +82,8 @@ bool xioTechnologiesCalculation::SolveAnCalculation( SENSOR_DB* sensor_data, SEN
     sensor_data->eacc_x = earth.axis.x;
     sensor_data->eacc_y = earth.axis.y;
     sensor_data->eacc_z = earth.axis.z;
+    // 自定义方法计算线性加速度
+    getLinearAccFromSd( sensor_data );
     //
     if ( ! CalculateVelAndPos( sensor_data, deltaTime ) )
     {
@@ -105,7 +108,8 @@ bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, flo
     Eigen::Vector3f acc( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z );
 
     // 为每个轴设置不同的阈值
-    Eigen::Vector3f axesThreshold( 0.03f, 0.05f, 0.2f );
+    // Eigen::Vector3f axesThreshold( 0.03f, 0.05f, 0.2f );
+    Eigen::Vector3f axesThreshold( 0.05f, 0.2f, 0.15f );
     //
     auto is_quiescence = isStationary( acc, axesThreshold );
     printf( "is_quiescence: %d , dalta_index: %d \n", is_quiescence, dalta_index );
