@@ -64,6 +64,8 @@ int main()
             init_sensor( sensor_mmc_, sensor_imu_ );
             server.commond_   = "";
             start_dalta_index = 0;
+            //
+            read_csv_doc_.Load( "data.csv" );
         }
         else if ( startsWith( server.commond_, "ReadCsv" ) )
         {
@@ -151,6 +153,8 @@ int main()
             init_sensor( sensor_mmc_, sensor_imu_ );
             server.commond_   = "Start";
             start_dalta_index = 0;
+            //
+            read_csv_doc_.Load( "data.csv" );
         }
         else if ( startsWith( server.commond_, "Clear" ) )
         {
