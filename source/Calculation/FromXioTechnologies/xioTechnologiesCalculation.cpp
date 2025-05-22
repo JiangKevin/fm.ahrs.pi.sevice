@@ -9,16 +9,16 @@ xioTechnologiesCalculation::xioTechnologiesCalculation()
     ResetInitFusion();
 }
 //
-bool xioTechnologiesCalculation::One_SolveAnCalculation( SENSOR_DB* sensor_data )
+bool xioTechnologiesCalculation::One_SolveAnCalculation( EIGEN_SENSOR_DATA* sensor_data )
 {
     float elapsed_time = ( float )( getMicrosecondTimestamp() - start_time ) / ( float )CLOCKS_PER_SEC;
     // Acquire latest sensor data
     const int64_t timestamp = sensor_data->time;
     // printf( "Timestamp Delta Time: %ld\n", timestamp );
 
-    FusionVector gyroscope     = { sensor_data->gyro_x, sensor_data->gyro_y, sensor_data->gyro_z };
-    FusionVector accelerometer = { sensor_data->acc_x, sensor_data->acc_y, sensor_data->acc_z };
-    FusionVector magnetometer  = { sensor_data->mag_x, sensor_data->mag_y, sensor_data->mag_z };
+    FusionVector gyroscope     = { sensor_data->gyr[ 0 ], sensor_data->gyr[ 0 ], sensor_data->gyr[ 0 ] };
+    FusionVector accelerometer = { sensor_data->acc[ 0 ], sensor_data->acc[ 1 ], sensor_data->acc[ 2 ] };
+    FusionVector magnetometer  = { sensor_data->mag[ 0 ], sensor_data->mag[ 1 ], sensor_data->mag[ 2 ] };
 
     // Apply calibration
     gyroscope     = FusionCalibrationInertial( gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset );
@@ -49,21 +49,19 @@ bool xioTechnologiesCalculation::One_SolveAnCalculation( SENSOR_DB* sensor_data 
     const FusionEuler  euler = FusionQuaternionToEuler( quate );
     const FusionVector earth = FusionAhrsGetEarthAcceleration( &ahrs );
     //
-    sensor_data->quate_x = quate.element.x;
-    sensor_data->quate_y = quate.element.y;
-    sensor_data->quate_z = quate.element.z;
-    sensor_data->quate_w = quate.element.w;
+    sensor_data->qua[ 0 ] = quate.element.x;
+    sensor_data->qua[ 1 ] = quate.element.y;
+    sensor_data->qua[ 2 ] = quate.element.z;
+    sensor_data->qua[ 3 ] = quate.element.w;
     //
-    sensor_data->roll  = euler.angle.roll;
-    sensor_data->pitch = euler.angle.pitch;
-    sensor_data->yaw   = euler.angle.yaw;
+    sensor_data->eul[ 0 ] = euler.angle.roll;
+    sensor_data->eul[ 1 ] = euler.angle.pitch;
+    sensor_data->eul[ 2 ] = euler.angle.yaw;
     //
-    sensor_data->eacc_x = earth.axis.x;
-    sensor_data->eacc_y = earth.axis.y;
-    sensor_data->eacc_z = earth.axis.z;
+    sensor_data->eacc[ 0 ] = earth.axis.x;
+    sensor_data->eacc[ 1 ] = earth.axis.y;
+    sensor_data->eacc[ 2 ] = earth.axis.z;
 
-    // 自定义方法计算线性加速度
-    // getLinearAccFromSd( sensor_data );
     //
     if ( ! CalculateVelAndPos( sensor_data, deltaTime, true ) )
     {
@@ -74,16 +72,16 @@ bool xioTechnologiesCalculation::One_SolveAnCalculation( SENSOR_DB* sensor_data 
 };
 
 //
-bool xioTechnologiesCalculation::Mul_SolveAnCalculation( SENSOR_DB* sensor_data, SENSOR_DB* original_sensor_data )
+bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sensor_data, EIGEN_SENSOR_DATA* original_sensor_data )
 {
     float elapsed_time = ( float )( getMicrosecondTimestamp() - start_time ) / ( float )CLOCKS_PER_SEC;
     // Acquire latest sensor data
     const int64_t timestamp = sensor_data->time;
     // printf( "Timestamp Delta Time: %ld\n", timestamp );
 
-    FusionVector gyroscope     = { sensor_data->gyro_x, sensor_data->gyro_y, sensor_data->gyro_z };
-    FusionVector accelerometer = { sensor_data->acc_x, sensor_data->acc_y, sensor_data->acc_z };
-    FusionVector magnetometer  = { sensor_data->mag_x, sensor_data->mag_y, sensor_data->mag_z };
+    FusionVector gyroscope     = { sensor_data->gyr[ 0 ], sensor_data->gyr[ 1 ], sensor_data->gyr[ 2 ] };
+    FusionVector accelerometer = { sensor_data->acc[ 0 ], sensor_data->acc[ 1 ], sensor_data->acc[ 2 ] };
+    FusionVector magnetometer  = { sensor_data->mag[ 0 ], sensor_data->mag[ 1 ], sensor_data->mag[ 2 ] };
 
     // Apply calibration
     gyroscope     = FusionCalibrationInertial( gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset );
@@ -115,18 +113,18 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( SENSOR_DB* sensor_data,
     const FusionVector earth = FusionAhrsGetEarthAcceleration( &ahrs );
     // const FusionVector earth = FusionAhrsGetLinearAcceleration( &ahrs );
     //
-    original_sensor_data->quate_x = quate.element.x;
-    original_sensor_data->quate_y = quate.element.y;
-    original_sensor_data->quate_z = quate.element.z;
-    original_sensor_data->quate_w = quate.element.w;
+    original_sensor_data->qua[ 0 ] = quate.element.x;
+    original_sensor_data->qua[ 1 ] = quate.element.y;
+    original_sensor_data->qua[ 2 ] = quate.element.z;
+    original_sensor_data->qua[ 3 ] = quate.element.w;
     //
-    original_sensor_data->roll  = euler.angle.roll;
-    original_sensor_data->pitch = euler.angle.pitch;
-    original_sensor_data->yaw   = euler.angle.yaw;
+    original_sensor_data->eul[ 0 ] = euler.angle.roll;
+    original_sensor_data->eul[ 1 ] = euler.angle.pitch;
+    original_sensor_data->eul[ 2 ] = euler.angle.yaw;
     //
-    original_sensor_data->eacc_x = earth.axis.x;
-    original_sensor_data->eacc_y = earth.axis.y;
-    original_sensor_data->eacc_z = earth.axis.z;
+    original_sensor_data->eacc[ 0 ] = earth.axis.x;
+    original_sensor_data->eacc[ 1 ] = earth.axis.y;
+    original_sensor_data->eacc[ 2 ] = earth.axis.z;
 
     //
     if ( ! CalculateVelAndPos( original_sensor_data, deltaTime, false ) )
@@ -134,18 +132,18 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( SENSOR_DB* sensor_data,
         return false;
     }
     //
-    sensor_data->quate_x = quate.element.x;
-    sensor_data->quate_y = quate.element.y;
-    sensor_data->quate_z = quate.element.z;
-    sensor_data->quate_w = quate.element.w;
+    sensor_data->qua[ 0 ] = quate.element.x;
+    sensor_data->qua[ 1 ] = quate.element.y;
+    sensor_data->qua[ 2 ] = quate.element.z;
+    sensor_data->qua[ 3 ] = quate.element.w;
     //
-    sensor_data->roll  = euler.angle.roll;
-    sensor_data->pitch = euler.angle.pitch;
-    sensor_data->yaw   = euler.angle.yaw;
+    sensor_data->eul[ 0 ] = euler.angle.roll;
+    sensor_data->eul[ 1 ] = euler.angle.pitch;
+    sensor_data->eul[ 2 ] = euler.angle.yaw;
     //
-    sensor_data->eacc_x = earth.axis.x;
-    sensor_data->eacc_y = earth.axis.y;
-    sensor_data->eacc_z = earth.axis.z;
+    sensor_data->eacc[ 0 ] = earth.axis.x;
+    sensor_data->eacc[ 1 ] = earth.axis.y;
+    sensor_data->eacc[ 2 ] = earth.axis.z;
 
     // 自定义方法计算线性加速度
     // getLinearAccFromSd( sensor_data );
@@ -158,7 +156,7 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( SENSOR_DB* sensor_data,
     return true;
 }
 //
-bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool is_hp )
+bool xioTechnologiesCalculation::CalculateVelAndPos( EIGEN_SENSOR_DATA* sensor_data, float dt, bool is_hp )
 {
     // 为每个轴设置不同的阈值
     float axesThreshold_x, axesThreshold_y, axesThreshold_z;
@@ -179,28 +177,28 @@ bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, flo
     if ( ! previousAcceleration_init )
     {
         previousAcceleration.resize( 3 );
-        isStationary( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z, axesThreshold_x, axesThreshold_y, axesThreshold_z );
-        previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
+        isStationary( sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ], axesThreshold_x, axesThreshold_y, axesThreshold_z );
+        previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
         previousAcceleration_init = true;
         //
         return false;
     }
     //
-    isStationary( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z, axesThreshold_x, axesThreshold_y, axesThreshold_z );
+    isStationary( sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ], axesThreshold_x, axesThreshold_y, axesThreshold_z );
     //
     Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
-    a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
+    a_next << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
     auto ret_v = computeVelocityOfTrapezoid( dt, previousAcceleration, a_next );
     //
-    previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
+    previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
     //
-    sensor_data->vel_x = ret_v[ 0 ];
-    sensor_data->vel_y = ret_v[ 1 ];
-    sensor_data->vel_z = ret_v[ 2 ];
+    sensor_data->vel[ 0 ] = ret_v[ 0 ];
+    sensor_data->vel[ 1 ] = ret_v[ 1 ];
+    sensor_data->vel[ 2 ] = ret_v[ 2 ];
 
-    sensor_data->pos_x += ( sensor_data->vel_x * dt );
-    sensor_data->pos_y += ( sensor_data->vel_y * dt );
-    sensor_data->pos_z += ( sensor_data->vel_z * dt );
+    sensor_data->pos[ 0 ] += ( sensor_data->vel[ 0 ] * dt );
+    sensor_data->pos[ 1 ] += ( sensor_data->vel[ 1 ] * dt );
+    sensor_data->pos[ 2 ] += ( sensor_data->vel[ 2 ] * dt );
 
     //
     return true;

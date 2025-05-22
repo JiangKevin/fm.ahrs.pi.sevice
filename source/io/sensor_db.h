@@ -33,7 +33,7 @@ static std::string transaction_to_string( float value )
     return out;
 }
 //
-struct SENSOR_DB
+struct EIGEN_SENSOR_DATA
 {
     float time    = 0.0f;
     float acc_x   = 0.0f;

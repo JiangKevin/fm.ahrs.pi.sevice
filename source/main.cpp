@@ -43,8 +43,8 @@ int main()
     MMC56x3  sensor_mmc_;
     ICM42670 sensor_imu_;
     //
-    SENSOR_DB sensor_data_;
-    SENSOR_DB original_sensor_data_;
+    EIGEN_SENSOR_DATA sensor_data_;
+    EIGEN_SENSOR_DATA original_sensor_data_;
     //
     init_sensor( sensor_mmc_, sensor_imu_ );
     //
