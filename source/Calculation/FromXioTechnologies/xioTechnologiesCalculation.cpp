@@ -160,18 +160,7 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( SENSOR_DB* sensor_data,
 //
 bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool is_hp )
 {
-    //
-    if ( ! previousAcceleration_init )
-    {
-        previousAcceleration.resize( 3 );
-        previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
-        previousAcceleration_init = true;
-        //
-        return false;
-    }
-    //
     // 为每个轴设置不同的阈值
-    // Eigen::Vector3f axesThreshold( 0.03f, 0.05f, 0.2f );
     float axesThreshold_x, axesThreshold_y, axesThreshold_z;
     //
     if ( is_hp )
@@ -186,7 +175,16 @@ bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, flo
         axesThreshold_y = 0.0f;
         axesThreshold_z = 0.0f;
     }
-
+    //
+    if ( ! previousAcceleration_init )
+    {
+        previousAcceleration.resize( 3 );
+        isStationary( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z, axesThreshold_x, axesThreshold_y, axesThreshold_z );
+        previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
+        previousAcceleration_init = true;
+        //
+        return false;
+    }
     //
     isStationary( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z, axesThreshold_x, axesThreshold_y, axesThreshold_z );
     //
@@ -196,9 +194,9 @@ bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, flo
     //
     previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
     //
-    sensor_data->vel_x += ret_v[ 0 ];
-    sensor_data->vel_y += ret_v[ 1 ];
-    sensor_data->vel_z += ret_v[ 2 ];
+    sensor_data->vel_x = ret_v[ 0 ];
+    sensor_data->vel_y = ret_v[ 1 ];
+    sensor_data->vel_z = ret_v[ 2 ];
 
     sensor_data->pos_x += ( sensor_data->vel_x * dt );
     sensor_data->pos_y += ( sensor_data->vel_y * dt );
