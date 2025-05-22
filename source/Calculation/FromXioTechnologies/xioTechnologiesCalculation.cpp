@@ -61,7 +61,8 @@ bool xioTechnologiesCalculation::One_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
     sensor_data->eacc[ 0 ] = earth.axis.x;
     sensor_data->eacc[ 1 ] = earth.axis.y;
     sensor_data->eacc[ 2 ] = earth.axis.z;
-
+    //
+    sensor_data->totalAcc = sensor_data->eacc.norm();
     //
     if ( ! CalculateVelAndPos( sensor_data, deltaTime, true ) )
     {
