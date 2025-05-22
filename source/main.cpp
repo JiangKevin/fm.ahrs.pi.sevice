@@ -68,17 +68,29 @@ int main()
         else if ( startsWith( server.commond_, "ReadCsv" ) )
         {
             static int row_index = 0;
+            start_dalta_index++;
+            ahrs_calculation_.start_time = server.start_time;
             //
             auto read_ret = read_csv_by_index( row_index, read_csv_doc_, sensor_data_ );
             //
             if ( read_ret )
             {
-                std::string command = "AfterCalculation:";
-                command += sensor_data_.to_string();
-                // printf("%s\n",command.c_str());
-                server.handleSend( command );
-                // Run @ ODR 100Hz:10
-                std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
+                if ( start_dalta_index > 10 )
+                {
+                    start_dalta_index = 11;
+                    //
+                    auto calcula_ret = ahrs_calculation_.One_SolveAnCalculation( &sensor_data_ );
+                    //
+                    if ( calcula_ret )
+                    {
+                        std::string command = "AfterCalculation:";
+                        command += sensor_data_.to_string();
+                        // printf("%s\n",command.c_str());
+                        server.handleSend( command );
+                    }
+                    // Run @ ODR 100Hz:10
+                    std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
+                }
             }
             //
         }
