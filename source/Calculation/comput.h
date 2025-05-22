@@ -9,7 +9,6 @@
 #include <iostream>
 //
 // 定义状态向量维度：3 维位置 + 3 维速度
-static constexpr size_t DIM_X                = 6;
 static Eigen::VectorXf  previousAcceleration = Eigen::VectorXf::Zero( 3 );
 static int              start_dalta_index    = 0;
 // static int              dalta_index          = 0;
@@ -81,3 +80,9 @@ static void getLinearAccFromSd( SENSOR_DB* sd )
     sd->eacc_y = linearAcc[ 1 ];
     sd->eacc_z = linearAcc[ 2 ];
 }
+//
+// // 计算总加速度（向量模）
+// static float computeTotalAcceleration( const Vec3& acc )
+// {
+//     return std::sqrt( acc.x * acc.x + acc.y * acc.y + acc.z * acc.z );
+// }
