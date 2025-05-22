@@ -58,6 +58,7 @@ static void init_out_csv( rapidcsv::Document& csv_doc )
     csv_doc.SetColumnName( 24, "Estimated Position Y (m)" );
     csv_doc.SetColumnName( 25, "Estimated Position Z (m)" );
     csv_doc.SetColumnName( 26, "Delta Time (s)" );
+    csv_doc.SetColumnName( 27, "Total Acc (g)" );
 }
 //
 static void update_out_csv( int& index, rapidcsv::Document& csv_doc, const EIGEN_SENSOR_DATA& sensor_data )
@@ -65,32 +66,33 @@ static void update_out_csv( int& index, rapidcsv::Document& csv_doc, const EIGEN
     // csv_doc.
     // 添加数据行
     csv_doc.SetCell< int64_t >( 0, index, sensor_data.time );
-    csv_doc.SetCell< float >( 1, index, sensor_data.gyr[0] );
-    csv_doc.SetCell< float >( 2, index, sensor_data.gyr[1] );
-    csv_doc.SetCell< float >( 3, index, sensor_data.gyr[2] );
-    csv_doc.SetCell< float >( 4, index, sensor_data.acc[0] );
-    csv_doc.SetCell< float >( 5, index, sensor_data.acc[1] );
-    csv_doc.SetCell< float >( 6, index, sensor_data.acc[2] );
-    csv_doc.SetCell< float >( 7, index, sensor_data.mag[0] );
-    csv_doc.SetCell< float >( 8, index, sensor_data.mag[1] );
-    csv_doc.SetCell< float >( 9, index, sensor_data.mag[1] );
-    csv_doc.SetCell< float >( 10, index, sensor_data.qua[0] );
-    csv_doc.SetCell< float >( 11, index, sensor_data.qua[1] );
-    csv_doc.SetCell< float >( 12, index, sensor_data.qua[2] );
-    csv_doc.SetCell< float >( 13, index, sensor_data.qua[3] );
-    csv_doc.SetCell< float >( 14, index, sensor_data.eul[0] );
-    csv_doc.SetCell< float >( 15, index, sensor_data.eul[1] );
-    csv_doc.SetCell< float >( 16, index, sensor_data.eul[2] );
-    csv_doc.SetCell< float >( 17, index, sensor_data.eacc[0] );
-    csv_doc.SetCell< float >( 18, index, sensor_data.eacc[1] );
-    csv_doc.SetCell< float >( 19, index, sensor_data.eacc[2] );
-    csv_doc.SetCell< float >( 20, index, sensor_data.vel[0] );
-    csv_doc.SetCell< float >( 21, index, sensor_data.vel[1] );
-    csv_doc.SetCell< float >( 22, index, sensor_data.vel[2] );
-    csv_doc.SetCell< float >( 23, index, sensor_data.pos[0] );
-    csv_doc.SetCell< float >( 24, index, sensor_data.pos[1] );
-    csv_doc.SetCell< float >( 25, index, sensor_data.pos[2] );
+    csv_doc.SetCell< float >( 1, index, sensor_data.gyr[ 0 ] );
+    csv_doc.SetCell< float >( 2, index, sensor_data.gyr[ 1 ] );
+    csv_doc.SetCell< float >( 3, index, sensor_data.gyr[ 2 ] );
+    csv_doc.SetCell< float >( 4, index, sensor_data.acc[ 0 ] );
+    csv_doc.SetCell< float >( 5, index, sensor_data.acc[ 1 ] );
+    csv_doc.SetCell< float >( 6, index, sensor_data.acc[ 2 ] );
+    csv_doc.SetCell< float >( 7, index, sensor_data.mag[ 0 ] );
+    csv_doc.SetCell< float >( 8, index, sensor_data.mag[ 1 ] );
+    csv_doc.SetCell< float >( 9, index, sensor_data.mag[ 1 ] );
+    csv_doc.SetCell< float >( 10, index, sensor_data.qua[ 0 ] );
+    csv_doc.SetCell< float >( 11, index, sensor_data.qua[ 1 ] );
+    csv_doc.SetCell< float >( 12, index, sensor_data.qua[ 2 ] );
+    csv_doc.SetCell< float >( 13, index, sensor_data.qua[ 3 ] );
+    csv_doc.SetCell< float >( 14, index, sensor_data.eul[ 0 ] );
+    csv_doc.SetCell< float >( 15, index, sensor_data.eul[ 1 ] );
+    csv_doc.SetCell< float >( 16, index, sensor_data.eul[ 2 ] );
+    csv_doc.SetCell< float >( 17, index, sensor_data.eacc[ 0 ] );
+    csv_doc.SetCell< float >( 18, index, sensor_data.eacc[ 1 ] );
+    csv_doc.SetCell< float >( 19, index, sensor_data.eacc[ 2 ] );
+    csv_doc.SetCell< float >( 20, index, sensor_data.vel[ 0 ] );
+    csv_doc.SetCell< float >( 21, index, sensor_data.vel[ 1 ] );
+    csv_doc.SetCell< float >( 22, index, sensor_data.vel[ 2 ] );
+    csv_doc.SetCell< float >( 23, index, sensor_data.pos[ 0 ] );
+    csv_doc.SetCell< float >( 24, index, sensor_data.pos[ 1 ] );
+    csv_doc.SetCell< float >( 25, index, sensor_data.pos[ 2 ] );
     csv_doc.SetCell< float >( 26, index, sensor_data.deltaTime );
+    csv_doc.SetCell< float >( 27, index, sensor_data.totalAcc );
     //
     index++;
 }
@@ -102,32 +104,33 @@ static bool read_csv_by_index( int& index, rapidcsv::Document& csv_doc, EIGEN_SE
     if ( index < count )
     {
         sensor_data.time      = csv_doc.GetCell< int64_t >( 0, index );
-        sensor_data.gyr[0]    = csv_doc.GetCell< float >( 1, index );
-        sensor_data.gyr[1]    = csv_doc.GetCell< float >( 2, index );
-        sensor_data.gyr[2]    = csv_doc.GetCell< float >( 3, index );
-        sensor_data.acc[0]     = csv_doc.GetCell< float >( 4, index );
-        sensor_data.acc[1]     = csv_doc.GetCell< float >( 5, index );
-        sensor_data.acc[2]     = csv_doc.GetCell< float >( 6, index );
-        sensor_data.mag[0]     = csv_doc.GetCell< float >( 7, index );
-        sensor_data.mag[1]     = csv_doc.GetCell< float >( 8, index );
-        sensor_data.mag[1]     = csv_doc.GetCell< float >( 9, index );
-        sensor_data.qua[0]   = csv_doc.GetCell< float >( 10, index );
-        sensor_data.qua[1]   = csv_doc.GetCell< float >( 11, index );
-        sensor_data.qua[2]   = csv_doc.GetCell< float >( 12, index );
-        sensor_data.qua[3]   = csv_doc.GetCell< float >( 13, index );
-        sensor_data.eul[0]      = csv_doc.GetCell< float >( 14, index );
-        sensor_data.eul[1]     = csv_doc.GetCell< float >( 15, index );
-        sensor_data.eul[2]       = csv_doc.GetCell< float >( 16, index );
-        sensor_data.eacc[0]    = csv_doc.GetCell< float >( 17, index );
-        sensor_data.eacc[1]    = csv_doc.GetCell< float >( 18, index );
-        sensor_data.eacc[2]    = csv_doc.GetCell< float >( 19, index );
-        sensor_data.vel[0]     = csv_doc.GetCell< float >( 20, index );
-        sensor_data.vel[1]     = csv_doc.GetCell< float >( 21, index );
-        sensor_data.vel[2]     = csv_doc.GetCell< float >( 22, index );
-        sensor_data.pos[0]     = csv_doc.GetCell< float >( 23, index );
-        sensor_data.pos[1]     = csv_doc.GetCell< float >( 24, index );
-        sensor_data.pos[2]     = csv_doc.GetCell< float >( 25, index );
+        sensor_data.gyr[ 0 ]  = csv_doc.GetCell< float >( 1, index );
+        sensor_data.gyr[ 1 ]  = csv_doc.GetCell< float >( 2, index );
+        sensor_data.gyr[ 2 ]  = csv_doc.GetCell< float >( 3, index );
+        sensor_data.acc[ 0 ]  = csv_doc.GetCell< float >( 4, index );
+        sensor_data.acc[ 1 ]  = csv_doc.GetCell< float >( 5, index );
+        sensor_data.acc[ 2 ]  = csv_doc.GetCell< float >( 6, index );
+        sensor_data.mag[ 0 ]  = csv_doc.GetCell< float >( 7, index );
+        sensor_data.mag[ 1 ]  = csv_doc.GetCell< float >( 8, index );
+        sensor_data.mag[ 1 ]  = csv_doc.GetCell< float >( 9, index );
+        sensor_data.qua[ 0 ]  = csv_doc.GetCell< float >( 10, index );
+        sensor_data.qua[ 1 ]  = csv_doc.GetCell< float >( 11, index );
+        sensor_data.qua[ 2 ]  = csv_doc.GetCell< float >( 12, index );
+        sensor_data.qua[ 3 ]  = csv_doc.GetCell< float >( 13, index );
+        sensor_data.eul[ 0 ]  = csv_doc.GetCell< float >( 14, index );
+        sensor_data.eul[ 1 ]  = csv_doc.GetCell< float >( 15, index );
+        sensor_data.eul[ 2 ]  = csv_doc.GetCell< float >( 16, index );
+        sensor_data.eacc[ 0 ] = csv_doc.GetCell< float >( 17, index );
+        sensor_data.eacc[ 1 ] = csv_doc.GetCell< float >( 18, index );
+        sensor_data.eacc[ 2 ] = csv_doc.GetCell< float >( 19, index );
+        sensor_data.vel[ 0 ]  = csv_doc.GetCell< float >( 20, index );
+        sensor_data.vel[ 1 ]  = csv_doc.GetCell< float >( 21, index );
+        sensor_data.vel[ 2 ]  = csv_doc.GetCell< float >( 22, index );
+        sensor_data.pos[ 0 ]  = csv_doc.GetCell< float >( 23, index );
+        sensor_data.pos[ 1 ]  = csv_doc.GetCell< float >( 24, index );
+        sensor_data.pos[ 2 ]  = csv_doc.GetCell< float >( 25, index );
         sensor_data.deltaTime = csv_doc.GetCell< float >( 26, index );
+        sensor_data.totalAcc  = csv_doc.GetCell< float >( 27, index );
         //
         index++;
         //
@@ -181,13 +184,13 @@ static bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, EIGEN_S
     float x, y, z;
     if ( sensor_mmc.getEvent( x, y, z ) )
     {
-        sensor_data.mag[0] = x;
-        sensor_data.mag[1] = y;
-        sensor_data.mag[1] = z;
+        sensor_data.mag[ 0 ] = x;
+        sensor_data.mag[ 1 ] = y;
+        sensor_data.mag[ 1 ] = z;
         //
-        original_sensor_data.mag[0] = x;
-        original_sensor_data.mag[1] = y;
-        original_sensor_data.mag[1] = z;
+        original_sensor_data.mag[ 0 ] = x;
+        original_sensor_data.mag[ 1 ] = y;
+        original_sensor_data.mag[ 1 ] = z;
     }
     else
     {
@@ -203,19 +206,19 @@ static bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, EIGEN_S
     // Get last event
     sensor_imu.getDataFromRegisters( imu_event );
     //
-    sensor_data.acc[0]  = imu_event.accel[ 0 ] / 2048.0;
-    sensor_data.acc[1]  = imu_event.accel[ 1 ] / 2048.0;
-    sensor_data.acc[2]  = imu_event.accel[ 2 ] / 2048.0;
-    sensor_data.gyr[0] = imu_event.gyro[ 0 ] / 16.4;
-    sensor_data.gyr[1] = imu_event.gyro[ 1 ] / 16.4;
-    sensor_data.gyr[2] = imu_event.gyro[ 2 ] / 16.4;
+    sensor_data.acc[ 0 ] = imu_event.accel[ 0 ] / 2048.0;
+    sensor_data.acc[ 1 ] = imu_event.accel[ 1 ] / 2048.0;
+    sensor_data.acc[ 2 ] = imu_event.accel[ 2 ] / 2048.0;
+    sensor_data.gyr[ 0 ] = imu_event.gyro[ 0 ] / 16.4;
+    sensor_data.gyr[ 1 ] = imu_event.gyro[ 1 ] / 16.4;
+    sensor_data.gyr[ 2 ] = imu_event.gyro[ 2 ] / 16.4;
     //
-    original_sensor_data.acc[0]  = imu_event.accel[ 0 ] / 2048.0;
-    original_sensor_data.acc[1]  = imu_event.accel[ 1 ] / 2048.0;
-    original_sensor_data.acc[2]  = imu_event.accel[ 2 ] / 2048.0;
-    original_sensor_data.gyr[0] = imu_event.gyro[ 0 ] / 16.4;
-    original_sensor_data.gyr[1] = imu_event.gyro[ 1 ] / 16.4;
-    original_sensor_data.gyr[2] = imu_event.gyro[ 2 ] / 16.4;
+    original_sensor_data.acc[ 0 ] = imu_event.accel[ 0 ] / 2048.0;
+    original_sensor_data.acc[ 1 ] = imu_event.accel[ 1 ] / 2048.0;
+    original_sensor_data.acc[ 2 ] = imu_event.accel[ 2 ] / 2048.0;
+    original_sensor_data.gyr[ 0 ] = imu_event.gyro[ 0 ] / 16.4;
+    original_sensor_data.gyr[ 1 ] = imu_event.gyro[ 1 ] / 16.4;
+    original_sensor_data.gyr[ 2 ] = imu_event.gyro[ 2 ] / 16.4;
 
     //
     return true;
