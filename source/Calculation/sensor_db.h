@@ -93,7 +93,7 @@ static std::string int64_transaction_to_string( int64_t value )
     //
     return out;
 }
-// 
+//
 struct EIGEN_SENSOR_DATA
 {
     int64_t         time      = 0;
@@ -106,6 +106,7 @@ struct EIGEN_SENSOR_DATA
     Eigen::VectorXf vel       = Eigen::VectorXf::Zero( 3 );
     Eigen::VectorXf pos       = Eigen::VectorXf::Zero( 3 );
     float           deltaTime = 0.0f;
+    float           totalAcc  = 0.0f;
 
     //
     std::string to_string()
@@ -119,7 +120,9 @@ struct EIGEN_SENSOR_DATA
         str += transaction_to_string( eacc[ 0 ] ) + "," + transaction_to_string( eacc[ 1 ] ) + "," + transaction_to_string( eacc[ 2 ] ) + ",";
         str += transaction_to_string( vel[ 0 ] ) + "," + transaction_to_string( vel[ 1 ] ) + "," + transaction_to_string( vel[ 2 ] ) + ",";
         str += transaction_to_string( pos[ 0 ] ) + "," + transaction_to_string( pos[ 1 ] ) + "," + transaction_to_string( pos[ 2 ] ) + ",";
-        str += transaction_to_string( deltaTime );
+        str += transaction_to_string( deltaTime ) + ",";
+        str += transaction_to_string( totalAcc );
+
         //
         return str;
     }
@@ -136,6 +139,7 @@ struct EIGEN_SENSOR_DATA
         info += "Estimated Velocity: (" + transaction_to_string( vel[ 0 ] ) + ", " + transaction_to_string( vel[ 1 ] ) + ", " + transaction_to_string( vel[ 2 ] ) + ")\n";
         info += "Position: (" + transaction_to_string( pos[ 0 ] ) + ", " + transaction_to_string( pos[ 1 ] ) + ", " + transaction_to_string( pos[ 2 ] ) + ")\n";
         info += "deltaTime: (" + transaction_to_string( deltaTime ) + ")\n";
+        info += "totalAcc: (" + transaction_to_string( totalAcc ) + ")\n";
 
         return info;
     }
@@ -145,7 +149,7 @@ struct EIGEN_SENSOR_DATA
         char delimiter = ',';
         auto values    = splitString( v, delimiter );
         //
-        if ( values.size() == 27 )
+        if ( values.size() == 28 )
         {
             time      = std::stoll( values[ 0 ] );
             acc[ 0 ]  = std::stof( values[ 1 ] );
@@ -174,6 +178,7 @@ struct EIGEN_SENSOR_DATA
             pos[ 1 ]  = std::stof( values[ 24 ] );
             pos[ 2 ]  = std::stof( values[ 25 ] );
             deltaTime = std::stof( values[ 26 ] );
+            totalAcc  = std::stof( values[ 27 ] );
         }
     }
     //
@@ -206,5 +211,6 @@ struct EIGEN_SENSOR_DATA
         pos[ 1 ]  = 0.0f;
         pos[ 2 ]  = 0.0f;
         deltaTime = 0.0f;
+        totalAcc  = 0.0f;
     }
 };

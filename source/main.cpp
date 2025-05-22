@@ -27,9 +27,6 @@ static void signalHandler_for_gloab( int signum )
 //
 int main()
 {
-    EIGEN_SENSOR_DATA esd;
-    std::cout << esd.to_string() << std::endl;
-
     server.setPort( port );
     server.start();
     server.str_fusion_config = ahrs_calculation_.GetConfigString();
