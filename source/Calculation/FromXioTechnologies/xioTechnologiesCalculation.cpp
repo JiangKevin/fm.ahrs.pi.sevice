@@ -160,7 +160,6 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( SENSOR_DB* sensor_data,
 //
 bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, float dt, bool is_hp )
 {
-
     //
     if ( ! previousAcceleration_init )
     {
@@ -171,9 +170,6 @@ bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, flo
         return false;
     }
     //
-
-    Eigen::Vector3f acc( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z );
-
     // 为每个轴设置不同的阈值
     // Eigen::Vector3f axesThreshold( 0.03f, 0.05f, 0.2f );
     float axesThreshold_x, axesThreshold_y, axesThreshold_z;
@@ -192,37 +188,21 @@ bool xioTechnologiesCalculation::CalculateVelAndPos( SENSOR_DB* sensor_data, flo
     }
 
     //
-    bool is_quiescence = isStationary( acc, axesThreshold_x, axesThreshold_y, axesThreshold_z );
+    isStationary( sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z, axesThreshold_x, axesThreshold_y, axesThreshold_z );
     //
-    if ( is_quiescence )
-    {
-        sensor_data->eacc_x = 0.0f;
-        sensor_data->eacc_y = 0.0f;
-        sensor_data->eacc_z = 0.0f;
-        //
-        sensor_data->vel_x = 0.0f;
-        sensor_data->vel_y = 0.0f;
-        sensor_data->vel_z = 0.0f;
-        // 
-        previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
-    }
-    else
-    {
-        Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
-        a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
-        auto ret_v = computeVelocityOfTrapezoid( dt, previousAcceleration, a_next );
-        //
-        //
-        previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
-        //
-        sensor_data->vel_x += ret_v[ 0 ];
-        sensor_data->vel_y += ret_v[ 1 ];
-        sensor_data->vel_z += ret_v[ 2 ];
+    Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
+    a_next << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
+    auto ret_v = computeVelocityOfTrapezoid( dt, previousAcceleration, a_next );
+    //
+    previousAcceleration << sensor_data->eacc_x, sensor_data->eacc_y, sensor_data->eacc_z;
+    //
+    sensor_data->vel_x += ret_v[ 0 ];
+    sensor_data->vel_y += ret_v[ 1 ];
+    sensor_data->vel_z += ret_v[ 2 ];
 
-        sensor_data->pos_x += ( sensor_data->vel_x * dt );
-        sensor_data->pos_y += ( sensor_data->vel_y * dt );
-        sensor_data->pos_z += ( sensor_data->vel_z * dt );
-    }
+    sensor_data->pos_x += ( sensor_data->vel_x * dt );
+    sensor_data->pos_y += ( sensor_data->vel_y * dt );
+    sensor_data->pos_z += ( sensor_data->vel_z * dt );
 
     //
     return true;

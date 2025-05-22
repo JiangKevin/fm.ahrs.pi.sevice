@@ -11,8 +11,9 @@
 // 定义状态向量维度：3 维位置 + 3 维速度
 static constexpr size_t DIM_X                = 6;
 static Eigen::VectorXf  previousAcceleration = Eigen::VectorXf::Zero( 3 );
-static int              dalta_index          = 0;
-// static int              start_dalta_index    = 0;
+static int              start_dalta_index    = 0;
+// static int              dalta_index          = 0;
+
 //
 static Eigen::VectorXf computeVelocityOfTrapezoid( float dt, const Eigen::VectorXf& a_prev, const Eigen::VectorXf& a_next )
 {
@@ -22,22 +23,22 @@ static Eigen::VectorXf computeVelocityOfTrapezoid( float dt, const Eigen::Vector
 //
 // 判断设备是否静止：对于 x, y, z 轴分别设置不同的阈值
 // 参数 axesThreshold 的每个分量分别对应 x, y, z 轴的阈值
-static bool isStationary( Eigen::Vector3f& netAcc, float axesThreshold_x, float axesThreshold_y, float axesThreshold_z )
+static bool isStationary( float& netAc_x, float& netAc_y, float& netAc_z, float axesThreshold_x, float axesThreshold_y, float axesThreshold_z )
 {
-    if ( std::abs( netAcc.x() ) < axesThreshold_x )
+    if ( std::abs( netAc_x ) < axesThreshold_x )
     {
-        netAcc.x() = 0.0f;
+        netAc_x = 0.0f;
     }
-    if ( std::abs( netAcc.y() ) < axesThreshold_y )
+    if ( std::abs( netAc_y ) < axesThreshold_y )
     {
-        netAcc.y() = 0.0f;
+        netAc_y = 0.0f;
     }
-    if ( std::abs( netAcc.z() ) < axesThreshold_z )
+    if ( std::abs( netAc_z ) < axesThreshold_z )
     {
-        netAcc.z() = 0.0f;
+        netAc_z = 0.0f;
     }
     // 当所有轴均等于 0.0f 时，认为设备处于静止状态
-    return ( netAcc.x() == 0.0f && netAcc.y() == 0.0f && netAcc.z() == 0.0f );
+    return ( netAc_x == 0.0f && netAc_y == 0.0f && netAc_z == 0.0f );
 }
 // 使用 Eigen::VectorXf 表示动态长度向量
 // 这里假设传感器加速度数据为 3 维向量（即传感器的 x, y, z 分量）
