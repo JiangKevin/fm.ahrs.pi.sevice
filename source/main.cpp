@@ -69,9 +69,9 @@ int main()
         {
             static int row_index = 0;
             //
-            auto ret = read_csv_by_index( row_index, read_csv_doc_, sensor_data_ );
+            auto read_ret = read_csv_by_index( row_index, read_csv_doc_, sensor_data_ );
             //
-            if ( ret )
+            if ( read_ret )
             {
                 std::string command = "AfterCalculation:";
                 command += sensor_data_.to_string();
@@ -95,7 +95,7 @@ int main()
                 {
                     start_dalta_index = 11;
                     //
-                    auto calcula_ret = ahrs_calculation_.SolveAnCalculation( &sensor_data_, &original_sensor_data_ );
+                    auto calcula_ret = ahrs_calculation_.Mul_SolveAnCalculation( &sensor_data_, &original_sensor_data_ );
                     //
                     if ( calcula_ret )
                     {
