@@ -63,9 +63,12 @@ public:
     };
     //
 public:
-    bool        Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sensor_data, EIGEN_SENSOR_DATA* original_sensor_data );
-    bool        One_SolveAnCalculation( EIGEN_SENSOR_DATA* sensor_data );
-    bool        CalculateVelAndPos( EIGEN_SENSOR_DATA* sensor_data, float dt, bool is_hp );
+    bool Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sensor_data, EIGEN_SENSOR_DATA* original_sensor_data );
+    bool Mul_CalculateVelAndPos( EIGEN_SENSOR_DATA* sensor_data, float dt, bool is_hp );
+    //
+    bool One_SolveAnCalculation( EIGEN_SENSOR_DATA* sensor_data );
+    bool One_CalculateVelAndPos( EIGEN_SENSOR_DATA* sensor_data, float dt, bool is_hp );
+    //
     void        ResetInitial();
     void        ResetInitFusion();
     void        ConfigFusion( std::string content );

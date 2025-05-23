@@ -9,70 +9,6 @@ xioTechnologiesCalculation::xioTechnologiesCalculation()
     ResetInitFusion();
 }
 //
-bool xioTechnologiesCalculation::One_SolveAnCalculation( EIGEN_SENSOR_DATA* sensor_data )
-{
-    float elapsed_time = ( float )( getMicrosecondTimestamp() - start_time ) / ( float )CLOCKS_PER_SEC;
-    // Acquire latest sensor data
-    const int64_t timestamp = sensor_data->time;
-    // printf( "Timestamp Delta Time: %ld\n", timestamp );
-
-    FusionVector gyroscope     = { sensor_data->gyr[ 0 ], sensor_data->gyr[ 0 ], sensor_data->gyr[ 0 ] };
-    FusionVector accelerometer = { sensor_data->acc[ 0 ], sensor_data->acc[ 1 ], sensor_data->acc[ 2 ] };
-    FusionVector magnetometer  = { sensor_data->mag[ 0 ], sensor_data->mag[ 1 ], sensor_data->mag[ 2 ] };
-
-    // Apply calibration
-    gyroscope     = FusionCalibrationInertial( gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset );
-    accelerometer = FusionCalibrationInertial( accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset );
-    magnetometer  = FusionCalibrationMagnetic( magnetometer, softIronMatrix, hardIronOffset );
-
-    // printf("Offset")
-    // Update gyroscope offset correction algorithm
-    gyroscope = FusionOffsetUpdate( &offset, gyroscope );
-
-    // Calculate delta time (in seconds) to account for gyroscope sample clock error
-
-    static float one_deltaTime = ( float )( timestamp - previousTimestamp ) / ( float )CLOCKS_PER_SEC;
-    previousTimestamp          = timestamp;
-    //
-    // printf( "Delta Time: %f\n", deltaTime );
-    //
-    if ( one_deltaTime > 1.0 )
-    {
-        return false;
-    }
-    sensor_data->deltaTime = one_deltaTime;
-    // Update gyroscope AHRS algorithm
-    FusionAhrsUpdate( &ahrs, gyroscope, accelerometer, magnetometer, deltaTime );
-
-    // Print algorithm outputs
-    auto               quate = FusionAhrsGetQuaternion( &ahrs );
-    const FusionEuler  euler = FusionQuaternionToEuler( quate );
-    const FusionVector earth = FusionAhrsGetEarthAcceleration( &ahrs );
-    //
-    sensor_data->qua[ 0 ] = quate.element.x;
-    sensor_data->qua[ 1 ] = quate.element.y;
-    sensor_data->qua[ 2 ] = quate.element.z;
-    sensor_data->qua[ 3 ] = quate.element.w;
-    //
-    sensor_data->eul[ 0 ] = euler.angle.roll;
-    sensor_data->eul[ 1 ] = euler.angle.pitch;
-    sensor_data->eul[ 2 ] = euler.angle.yaw;
-    //
-    sensor_data->eacc[ 0 ] = earth.axis.x;
-    sensor_data->eacc[ 1 ] = earth.axis.y;
-    sensor_data->eacc[ 2 ] = earth.axis.z;
-    //
-    sensor_data->totalAcc = sensor_data->eacc.norm();
-    //
-    if ( ! CalculateVelAndPos( sensor_data, deltaTime, true ) )
-    {
-        return false;
-    }
-    //
-    return true;
-};
-
-//
 bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sensor_data, EIGEN_SENSOR_DATA* original_sensor_data )
 {
     float elapsed_time = ( float )( getMicrosecondTimestamp() - start_time ) / ( float )CLOCKS_PER_SEC;
@@ -129,7 +65,7 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
     original_sensor_data->totalAcc  = original_sensor_data->eacc.norm();
 
     //
-    if ( ! CalculateVelAndPos( original_sensor_data, deltaTime, false ) )
+    if ( ! Mul_CalculateVelAndPos( original_sensor_data, deltaTime, false ) )
     {
         return false;
     }
@@ -151,7 +87,7 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
     // 自定义方法计算线性加速度
     // getLinearAccFromSd( sensor_data );
     //
-    if ( ! CalculateVelAndPos( sensor_data, deltaTime, true ) )
+    if ( ! Mul_CalculateVelAndPos( sensor_data, deltaTime, true ) )
     {
         return false;
     }
@@ -159,7 +95,7 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
     return true;
 }
 //
-bool xioTechnologiesCalculation::CalculateVelAndPos( EIGEN_SENSOR_DATA* sensor_data, float dt, bool is_hp )
+bool xioTechnologiesCalculation::Mul_CalculateVelAndPos( EIGEN_SENSOR_DATA* sensor_data, float dt, bool is_hp )
 {
     // 为每个轴设置不同的阈值
     float axesThreshold_x, axesThreshold_y, axesThreshold_z;

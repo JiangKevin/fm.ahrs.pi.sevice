@@ -15,6 +15,7 @@ rapidcsv::Document         csv_doc_;
 rapidcsv::Document         read_csv_doc_( "data.csv" );
 WebSocketServer            server;
 xioTechnologiesCalculation ahrs_calculation_;
+static int                 read_csv_row_index = 0;
 // 信号处理函数
 static void signalHandler_for_gloab( int signum )
 {
@@ -61,18 +62,18 @@ int main()
             ahrs_calculation_.ResetInitFusion();
             ahrs_calculation_.ResetInitial();
             init_sensor( sensor_mmc_, sensor_imu_ );
-            server.commond_   = "";
-            start_dalta_index = 0;
+            server.commond_    = "";
+            start_dalta_index  = 0;
+            read_csv_row_index = 0;
             //
             read_csv_doc_.Load( "data.csv" );
         }
         else if ( startsWith( server.commond_, "ReadCsv" ) )
         {
-            static int row_index = 0;
             start_dalta_index++;
             ahrs_calculation_.start_time = server.start_time;
             //
-            auto read_ret = read_csv_by_index( row_index, read_csv_doc_, sensor_data_ );
+            auto read_ret = read_csv_by_index( read_csv_row_index, read_csv_doc_, sensor_data_ );
             //
             if ( read_ret )
             {
@@ -122,7 +123,7 @@ int main()
                         command += original_sensor_data_.to_string();
                         server.handleSend( command );
                         //
-                        if ( index < 10000 )
+                        if ( index < 100000 )
                         {
                             update_out_csv( index, csv_doc_, sensor_data_ );
                         }
@@ -135,9 +136,10 @@ int main()
         else if ( startsWith( server.commond_, "Pause" ) )
         {
             close_out_csv( csv_doc_ );
-            index             = 0;
-            server.commond_   = "";
-            start_dalta_index = 0;
+            index              = 0;
+            server.commond_    = "";
+            start_dalta_index  = 0;
+            read_csv_row_index = 0;
         }
         else if ( startsWith( server.commond_, "Reset" ) )
         {
@@ -150,8 +152,8 @@ int main()
             original_sensor_data_.ToZero();
             ahrs_calculation_.ResetInitial();
             init_sensor( sensor_mmc_, sensor_imu_ );
-            server.commond_   = "Start";
-            start_dalta_index = 0;
+            start_dalta_index  = 0;
+            read_csv_row_index = 0;
             //
             read_csv_doc_.Load( "data.csv" );
         }
