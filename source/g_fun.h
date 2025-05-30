@@ -74,7 +74,7 @@ static void update_out_csv( int& index, rapidcsv::Document& csv_doc, const EIGEN
     csv_doc.SetCell< float >( 6, index, sensor_data.acc[ 2 ] );
     csv_doc.SetCell< float >( 7, index, sensor_data.mag[ 0 ] );
     csv_doc.SetCell< float >( 8, index, sensor_data.mag[ 1 ] );
-    csv_doc.SetCell< float >( 9, index, sensor_data.mag[ 1 ] );
+    csv_doc.SetCell< float >( 9, index, sensor_data.mag[ 2 ] );
     csv_doc.SetCell< float >( 10, index, sensor_data.qua[ 0 ] );
     csv_doc.SetCell< float >( 11, index, sensor_data.qua[ 1 ] );
     csv_doc.SetCell< float >( 12, index, sensor_data.qua[ 2 ] );
@@ -112,7 +112,7 @@ static bool read_csv_by_index( int& index, rapidcsv::Document& csv_doc, EIGEN_SE
         sensor_data.acc[ 2 ]  = csv_doc.GetCell< float >( 6, index );
         sensor_data.mag[ 0 ]  = csv_doc.GetCell< float >( 7, index );
         sensor_data.mag[ 1 ]  = csv_doc.GetCell< float >( 8, index );
-        sensor_data.mag[ 1 ]  = csv_doc.GetCell< float >( 9, index );
+        sensor_data.mag[ 2 ]  = csv_doc.GetCell< float >( 9, index );
         sensor_data.qua[ 0 ]  = csv_doc.GetCell< float >( 10, index );
         sensor_data.qua[ 1 ]  = csv_doc.GetCell< float >( 11, index );
         sensor_data.qua[ 2 ]  = csv_doc.GetCell< float >( 12, index );
