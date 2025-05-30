@@ -40,7 +40,9 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
     {
         return false;
     }
-    sensor_data->deltaTime = deltaTime;
+    //
+    original_sensor_data->deltaTime = deltaTime;
+    sensor_data->deltaTime          = deltaTime;
     // Update gyroscope AHRS algorithm
     FusionAhrsUpdate( &ahrs, gyroscope, accelerometer, magnetometer, deltaTime );
 
@@ -115,7 +117,10 @@ bool xioTechnologiesCalculation::Mul_CalculateVelAndPos( EIGEN_SENSOR_DATA* sens
     {
         // mul_previousAcceleration.resize( 3 );
         isStationary( sensor_data, axesThreshold_x, axesThreshold_y, axesThreshold_z );
-        mul_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
+        mul_previousAcceleration[ 0 ] = sensor_data->eacc[ 0 ];
+        mul_previousAcceleration[ 1 ] = sensor_data->eacc[ 1 ];
+        mul_previousAcceleration[ 2 ] = sensor_data->eacc[ 2 ];
+        // mul_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
         mul_previousAcceleration_init = true;
         //
         return false;
@@ -127,7 +132,10 @@ bool xioTechnologiesCalculation::Mul_CalculateVelAndPos( EIGEN_SENSOR_DATA* sens
     a_next << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
     auto ret_v = computeVelocityOfTrapezoid( dt, mul_previousAcceleration, a_next );
     //
-    mul_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
+    // mul_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
+    mul_previousAcceleration[ 0 ] = sensor_data->eacc[ 0 ];
+    mul_previousAcceleration[ 1 ] = sensor_data->eacc[ 1 ];
+    mul_previousAcceleration[ 2 ] = sensor_data->eacc[ 2 ];
     //
     sensor_data->vel[ 0 ] = ret_v[ 0 ];
     sensor_data->vel[ 1 ] = ret_v[ 1 ];

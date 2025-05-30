@@ -213,4 +213,29 @@ struct EIGEN_SENSOR_DATA
         deltaTime = 0.0f;
         totalAcc  = 0.0f;
     }
+    //
+    void ToFusionZero()
+    {
+        time      = 0.0f;
+        acc[ 0 ]  = 0.0f;
+        acc[ 1 ]  = 0.0f;
+        acc[ 2 ]  = 0.0f;
+        gyr[ 0 ]  = 0.0f;
+        gyr[ 1 ]  = 0.0f;
+        gyr[ 2 ]  = 0.0f;
+        mag[ 0 ]  = 0.0f;
+        mag[ 1 ]  = 0.0f;
+        mag[ 2 ]  = 0.0f;
+        qua[ 0 ]  = 0.0f;
+        qua[ 1 ]  = 0.0f;
+        qua[ 2 ]  = 0.0f;
+        qua[ 3 ]  = 0.0f;
+        eul[ 0 ]  = 0.0f;
+        eul[ 1 ]  = 0.0f;
+        eul[ 2 ]  = 0.0f;
+        eacc[ 0 ] = 0.0f;
+        eacc[ 1 ] = 0.0f;
+        eacc[ 2 ] = 0.0f;
+        totalAcc  = 0.0f;
+    }
 };

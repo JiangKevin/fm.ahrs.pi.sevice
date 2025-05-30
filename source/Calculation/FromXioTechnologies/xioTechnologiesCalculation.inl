@@ -5,9 +5,9 @@ bool xioTechnologiesCalculation::One_CalculateVelAndPos( EIGEN_SENSOR_DATA* sens
     //
     if ( is_hp )
     {
-        axesThreshold_x = 0.05f;
-        axesThreshold_y = 0.2f;
-        axesThreshold_z = 0.15f;
+        axesThreshold_x = 0.004f;
+        axesThreshold_y = 0.015f;
+        axesThreshold_z = 0.004f;
     }
     else
     {

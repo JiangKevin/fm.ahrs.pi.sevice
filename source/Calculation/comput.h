@@ -21,26 +21,20 @@ static Eigen::VectorXf computeVelocityOfTrapezoid( float dt, const Eigen::Vector
 //
 // 判断设备是否静止：对于 x, y, z 轴分别设置不同的阈值
 // 参数 axesThreshold 的每个分量分别对应 x, y, z 轴的阈值
-static bool isStationary( EIGEN_SENSOR_DATA* sensor_data, float axesThreshold_x, float axesThreshold_y, float axesThreshold_z )
+static void isStationary( EIGEN_SENSOR_DATA* sensor_data, float axesThreshold_x, float axesThreshold_y, float axesThreshold_z )
 {
-    float netAc_x = sensor_data->eacc[ 0 ], netAc_y = sensor_data->eacc[ 1 ], netAc_z = sensor_data->eacc[ 2 ];
+    // float netAc_x = sensor_data->eacc[ 0 ], netAc_y = sensor_data->eacc[ 1 ], netAc_z = sensor_data->eacc[ 2 ];
     //
-    if ( std::abs( netAc_x ) < axesThreshold_x )
+    if ( std::abs( sensor_data->eacc[ 0 ] ) < axesThreshold_x )
     {
-        netAc_x = 0.0f;
+        sensor_data->eacc[ 0 ] = 0.0f;
     }
-    if ( std::abs( netAc_y ) < axesThreshold_y )
+    if ( std::abs( sensor_data->eacc[ 1 ] ) < axesThreshold_y )
     {
-        netAc_y = 0.0f;
+        sensor_data->eacc[ 1 ] = 0.0f;
     }
-    if ( std::abs( netAc_z ) < axesThreshold_z )
+    if ( std::abs( sensor_data->eacc[ 2 ] ) < axesThreshold_z )
     {
-        netAc_z = 0.0f;
+        sensor_data->eacc[ 2 ] = 0.0f;
     }
-    //
-    sensor_data->eacc[ 0 ] = netAc_x;
-    sensor_data->eacc[ 1 ] = netAc_y;
-    sensor_data->eacc[ 2 ] = netAc_z;
-    // 当所有轴均等于 0.0f 时，认为设备处于静止状态
-    return ( netAc_x == 0.0f && netAc_y == 0.0f && netAc_z == 0.0f );
 }

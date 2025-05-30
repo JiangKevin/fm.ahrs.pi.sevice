@@ -186,11 +186,11 @@ static bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, EIGEN_S
     {
         sensor_data.mag[ 0 ] = x;
         sensor_data.mag[ 1 ] = y;
-        sensor_data.mag[ 1 ] = z;
+        sensor_data.mag[ 2 ] = z;
         //
         original_sensor_data.mag[ 0 ] = x;
         original_sensor_data.mag[ 1 ] = y;
-        original_sensor_data.mag[ 1 ] = z;
+        original_sensor_data.mag[ 2 ] = z;
     }
     else
     {

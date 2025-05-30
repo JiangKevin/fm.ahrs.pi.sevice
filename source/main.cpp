@@ -73,6 +73,7 @@ int main()
             start_dalta_index++;
             ahrs_calculation_.start_time = server.start_time;
             //
+            sensor_data_.ToFusionZero();
             auto read_ret = read_csv_by_index( read_csv_row_index, read_csv_doc_, sensor_data_ );
             //
             if ( read_ret )
@@ -100,7 +101,9 @@ int main()
         {
             start_dalta_index++;
             ahrs_calculation_.start_time = server.start_time;
-
+            //
+            sensor_data_.ToFusionZero();
+            original_sensor_data_.ToFusionZero();
             //
             bool read_ret = read_sensor_data( sensor_mmc_, sensor_imu_, sensor_data_, original_sensor_data_ );
             if ( read_ret )
