@@ -1,7 +1,8 @@
 bool xioTechnologiesCalculation::One_CalculateVelAndPos( EIGEN_SENSOR_DATA* sensor_data, float dt, bool is_hp )
 {
     // 为每个轴设置不同的阈值
-    float axesThreshold_x = 0.0f, axesThreshold_y = 0.0f, axesThreshold_z = 0.0f;
+    float           axesThreshold_x = 0.0f, axesThreshold_y = 0.0f, axesThreshold_z = 0.0f;
+    Eigen::VectorXf one_previousAcceleration = Eigen::VectorXf::Zero( 3 );
     //
     if ( is_hp )
     {

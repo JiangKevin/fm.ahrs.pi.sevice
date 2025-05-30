@@ -98,13 +98,14 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
 bool xioTechnologiesCalculation::Mul_CalculateVelAndPos( EIGEN_SENSOR_DATA* sensor_data, float dt, bool is_hp )
 {
     // 为每个轴设置不同的阈值
-    float axesThreshold_x = 0.0f, axesThreshold_y = 0.0f, axesThreshold_z = 0.0f;
+    float           axesThreshold_x = 0.0f, axesThreshold_y = 0.0f, axesThreshold_z = 0.0f;
+    Eigen::VectorXf mul_previousAcceleration = Eigen::VectorXf::Zero( 3 );
     //
     if ( is_hp )
     {
-        axesThreshold_x = 0.004f;
-        axesThreshold_y = 0.015f;
-        axesThreshold_z = 0.004f;
+        axesThreshold_x = 0.01f;
+        axesThreshold_y = 0.02f;
+        axesThreshold_z = 0.01f;
     }
     else
     {
@@ -115,12 +116,8 @@ bool xioTechnologiesCalculation::Mul_CalculateVelAndPos( EIGEN_SENSOR_DATA* sens
     //
     if ( ! mul_previousAcceleration_init )
     {
-        // mul_previousAcceleration.resize( 3 );
         isStationary( sensor_data, axesThreshold_x, axesThreshold_y, axesThreshold_z );
-        mul_previousAcceleration[ 0 ] = sensor_data->eacc[ 0 ];
-        mul_previousAcceleration[ 1 ] = sensor_data->eacc[ 1 ];
-        mul_previousAcceleration[ 2 ] = sensor_data->eacc[ 2 ];
-        // mul_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
+        mul_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
         mul_previousAcceleration_init = true;
         //
         return false;
@@ -132,10 +129,7 @@ bool xioTechnologiesCalculation::Mul_CalculateVelAndPos( EIGEN_SENSOR_DATA* sens
     a_next << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
     auto ret_v = computeVelocityOfTrapezoid( dt, mul_previousAcceleration, a_next );
     //
-    // mul_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
-    mul_previousAcceleration[ 0 ] = sensor_data->eacc[ 0 ];
-    mul_previousAcceleration[ 1 ] = sensor_data->eacc[ 1 ];
-    mul_previousAcceleration[ 2 ] = sensor_data->eacc[ 2 ];
+    mul_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
     //
     sensor_data->vel[ 0 ] = ret_v[ 0 ];
     sensor_data->vel[ 1 ] = ret_v[ 1 ];

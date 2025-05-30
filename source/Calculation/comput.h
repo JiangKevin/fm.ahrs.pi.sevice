@@ -9,8 +9,8 @@
 #include <iostream>
 //
 // 定义状态向量维度：3 维位置 + 3 维速度
-static Eigen::VectorXf one_previousAcceleration = Eigen::VectorXf::Zero( 3 );
-static Eigen::VectorXf mul_previousAcceleration = Eigen::VectorXf::Zero( 3 );
+// static Eigen::VectorXf one_previousAcceleration = Eigen::VectorXf::Zero( 3 );
+// static Eigen::VectorXf mul_previousAcceleration = Eigen::VectorXf::Zero( 3 );
 static int             start_dalta_index        = 0;
 //
 static Eigen::VectorXf computeVelocityOfTrapezoid( float dt, const Eigen::VectorXf& a_prev, const Eigen::VectorXf& a_next )
