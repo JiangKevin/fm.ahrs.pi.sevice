@@ -1,7 +1,7 @@
 bool xioTechnologiesCalculation::One_CalculateVelAndPos( EIGEN_SENSOR_DATA* sensor_data, float dt, bool is_hp )
 {
     // 为每个轴设置不同的阈值
-    float axesThreshold_x, axesThreshold_y, axesThreshold_z;
+    float axesThreshold_x = 0.0f, axesThreshold_y = 0.0f, axesThreshold_z = 0.0f;
     //
     if ( is_hp )
     {
@@ -18,7 +18,7 @@ bool xioTechnologiesCalculation::One_CalculateVelAndPos( EIGEN_SENSOR_DATA* sens
     //
     if ( ! one_previousAcceleration_init )
     {
-        one_previousAcceleration.resize( 3 );
+        // one_previousAcceleration.resize( 3 );
         isStationary( sensor_data, axesThreshold_x, axesThreshold_y, axesThreshold_z );
         one_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
         one_previousAcceleration_init = true;

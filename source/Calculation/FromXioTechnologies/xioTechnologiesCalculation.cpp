@@ -84,8 +84,6 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
     sensor_data->eacc[ 2 ] = earth.axis.z;
     sensor_data->totalAcc  = sensor_data->eacc.norm();
 
-    // 自定义方法计算线性加速度
-    // getLinearAccFromSd( sensor_data );
     //
     if ( ! Mul_CalculateVelAndPos( sensor_data, deltaTime, true ) )
     {
@@ -98,12 +96,12 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
 bool xioTechnologiesCalculation::Mul_CalculateVelAndPos( EIGEN_SENSOR_DATA* sensor_data, float dt, bool is_hp )
 {
     // 为每个轴设置不同的阈值
-    float axesThreshold_x, axesThreshold_y, axesThreshold_z;
+    float axesThreshold_x = 0.0f, axesThreshold_y = 0.0f, axesThreshold_z = 0.0f;
     //
     if ( is_hp )
     {
         axesThreshold_x = 0.004f;
-        axesThreshold_y = 0.015;
+        axesThreshold_y = 0.015f;
         axesThreshold_z = 0.004f;
     }
     else
@@ -115,7 +113,7 @@ bool xioTechnologiesCalculation::Mul_CalculateVelAndPos( EIGEN_SENSOR_DATA* sens
     //
     if ( ! mul_previousAcceleration_init )
     {
-        mul_previousAcceleration.resize( 3 );
+        // mul_previousAcceleration.resize( 3 );
         isStationary( sensor_data, axesThreshold_x, axesThreshold_y, axesThreshold_z );
         mul_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
         mul_previousAcceleration_init = true;
