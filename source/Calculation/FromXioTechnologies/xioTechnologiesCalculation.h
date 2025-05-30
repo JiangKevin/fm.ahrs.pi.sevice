@@ -50,7 +50,8 @@ public:
     FusionOffset offset;
     FusionAhrs   ahrs;
     int64_t      previousTimestamp;
-    bool         previousAcceleration_init = false;
+    bool         one_previousAcceleration_init = false;
+    bool         mul_previousAcceleration_init = false;
     float        deltaTime;
     // Set AHRS algorithm settings
     FusionAhrsSettings settings = {

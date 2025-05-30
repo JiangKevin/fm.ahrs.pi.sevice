@@ -16,31 +16,31 @@ bool xioTechnologiesCalculation::One_CalculateVelAndPos( EIGEN_SENSOR_DATA* sens
         axesThreshold_z = 0.0f;
     }
     //
-    if ( ! previousAcceleration_init )
+    if ( ! one_previousAcceleration_init )
     {
-        previousAcceleration.resize( 3 );
-        isStationary( sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ], axesThreshold_x, axesThreshold_y, axesThreshold_z );
-        previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
-        previousAcceleration_init = true;
+        one_previousAcceleration.resize( 3 );
+        isStationary( sensor_data, axesThreshold_x, axesThreshold_y, axesThreshold_z );
+        one_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
+        one_previousAcceleration_init = true;
         //
         return false;
     }
     //
-    isStationary( sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ], axesThreshold_x, axesThreshold_y, axesThreshold_z );
+    isStationary( sensor_data, axesThreshold_x, axesThreshold_y, axesThreshold_z );
     //
     Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
     a_next << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
-    auto ret_v = computeVelocityOfTrapezoid( dt, previousAcceleration, a_next );
+    auto ret_v = computeVelocityOfTrapezoid( dt, one_previousAcceleration, a_next );
     //
-    previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
+    one_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
     //
     sensor_data->vel[ 0 ] = ret_v[ 0 ];
     sensor_data->vel[ 1 ] = ret_v[ 1 ];
     sensor_data->vel[ 2 ] = ret_v[ 2 ];
 
-    sensor_data->pos[ 0 ] += ( sensor_data->vel[ 0 ] * dt );
-    sensor_data->pos[ 1 ] += ( sensor_data->vel[ 1 ] * dt );
-    sensor_data->pos[ 2 ] += ( sensor_data->vel[ 2 ] * dt );
+    sensor_data->pos[ 0 ] += ( sensor_data->vel[ 0 ] * dt ) * 100000.0f;
+    sensor_data->pos[ 1 ] += ( sensor_data->vel[ 1 ] * dt ) * 100000.0f;
+    sensor_data->pos[ 2 ] += ( sensor_data->vel[ 2 ] * dt ) * 100000.0f;
 
     //
     return true;

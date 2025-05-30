@@ -160,7 +160,6 @@ int main()
         else if ( startsWith( server.commond_, "Clear" ) )
         {
             system( "clear" );
-            server.commond_   = "Start";
             start_dalta_index = 0;
         }
         else if ( startsWith( server.commond_, "Stop" ) )

@@ -102,9 +102,9 @@ bool xioTechnologiesCalculation::Mul_CalculateVelAndPos( EIGEN_SENSOR_DATA* sens
     //
     if ( is_hp )
     {
-        axesThreshold_x = 0.05f;
-        axesThreshold_y = 0.2f;
-        axesThreshold_z = 0.15f;
+        axesThreshold_x = 0.004f;
+        axesThreshold_y = 0.015;
+        axesThreshold_z = 0.004f;
     }
     else
     {
@@ -113,23 +113,23 @@ bool xioTechnologiesCalculation::Mul_CalculateVelAndPos( EIGEN_SENSOR_DATA* sens
         axesThreshold_z = 0.0f;
     }
     //
-    if ( ! previousAcceleration_init )
+    if ( ! mul_previousAcceleration_init )
     {
-        previousAcceleration.resize( 3 );
-        isStationary( sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ], axesThreshold_x, axesThreshold_y, axesThreshold_z );
-        previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
-        previousAcceleration_init = true;
+        mul_previousAcceleration.resize( 3 );
+        isStationary( sensor_data, axesThreshold_x, axesThreshold_y, axesThreshold_z );
+        mul_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
+        mul_previousAcceleration_init = true;
         //
         return false;
     }
     //
-    isStationary( sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ], axesThreshold_x, axesThreshold_y, axesThreshold_z );
+    isStationary( sensor_data, axesThreshold_x, axesThreshold_y, axesThreshold_z );
     //
     Eigen::VectorXf a_next = Eigen::VectorXf::Zero( 3 );
     a_next << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
-    auto ret_v = computeVelocityOfTrapezoid( dt, previousAcceleration, a_next );
+    auto ret_v = computeVelocityOfTrapezoid( dt, mul_previousAcceleration, a_next );
     //
-    previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
+    mul_previousAcceleration << sensor_data->eacc[ 0 ], sensor_data->eacc[ 1 ], sensor_data->eacc[ 2 ];
     //
     sensor_data->vel[ 0 ] = ret_v[ 0 ];
     sensor_data->vel[ 1 ] = ret_v[ 1 ];
@@ -148,7 +148,8 @@ void xioTechnologiesCalculation::ResetInitial()
     //
     previousTimestamp = getMicrosecondTimestamp();
     //
-    previousAcceleration_init = false;
+    mul_previousAcceleration_init = false;
+    one_previousAcceleration_init = false;
 }
 //
 void xioTechnologiesCalculation::ResetInitFusion()
@@ -160,7 +161,8 @@ void xioTechnologiesCalculation::ResetInitFusion()
     //
     previousTimestamp = getMicrosecondTimestamp();
     //
-    previousAcceleration_init = false;
+    mul_previousAcceleration_init = false;
+    one_previousAcceleration_init = false;
 }
 //
 void xioTechnologiesCalculation::ConfigFusion( std::string content )
