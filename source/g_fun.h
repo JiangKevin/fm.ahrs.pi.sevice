@@ -175,32 +175,6 @@ static void init_sensor( MMC56x3& sensor_mmc, ICM42670& sensor_imu )
     std::this_thread::sleep_for( std::chrono::milliseconds( 1000 ) );
 }
 //
-static void init_sensor_fifo( MMC56x3& sensor_mmc, ICM42670& sensor_imu )
-{
-    // Initializing the MMC56x3
-    if ( ! sensor_mmc.begin( deviceAddress_mmc, i2cDevice.c_str() ) )
-    {
-        printf( "Failed to initialize MMC56x3 sensor\n" );
-    }
-    // Initializing the ICM42670
-    int ret;
-    ret = sensor_imu.begin( false, deviceAddress_imu, i2cDevice.c_str() );
-    if ( ret != 0 )
-    {
-        printf( "Failed to initialize ICM42670 sensor\n" );
-    }
-    // Accel ODR = 100 Hz and Full Scale Range = 16G
-    sensor_imu.startAccel( 100, 16 );
-    // Gyro ODR = 100 Hz and Full Scale Range = 2000 dps
-    sensor_imu.startGyro( 100, 2000 );
-    // Pedometer enabled
-    sensor_imu.startPedometer();
-    // Tilt enabled
-    sensor_imu.startTiltDetection();
-    // Wait IMU to start
-    std::this_thread::sleep_for( std::chrono::milliseconds( 1000 ) );
-}
-//
 static bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, EIGEN_SENSOR_DATA& sensor_data, EIGEN_SENSOR_DATA& original_sensor_data )
 {
     //

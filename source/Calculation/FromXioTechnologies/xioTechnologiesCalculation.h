@@ -56,7 +56,7 @@ public:
     // Set AHRS algorithm settings
     FusionAhrsSettings settings = {
         .convention            = FusionConventionEnu,
-        .gain                  = 20.0f,
+        .gain                  = 0.5f,
         .gyroscopeRange        = 2000.0f, /* replace this with actual gyroscope range in degrees/s */
         .accelerationRejection = 10.0f,
         .magneticRejection     = 10.0f,
