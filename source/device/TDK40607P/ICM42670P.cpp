@@ -39,6 +39,7 @@ static const char* APEX_ACTIVITY[ 3 ] = { "IDLE", "WALK", "RUN" };
 // i2c
 #define I2C_DEFAULT_CLOCK         400000
 #define I2C_MAX_CLOCK             1000000
+#define ICM42670_I2C_ADDRESS      0x69
 #define ARDUINO_I2C_BUFFER_LENGTH 32
 // spi
 #define SPI_READ          0x80
@@ -297,9 +298,10 @@ int ICM42670::enableFifoInterrupt( uint8_t intpin, ICM42670_irq_handler handler,
     rc |= inv_imu_read_reg( &icm_driver, FIFO_CONFIG5_MREG1, 1, &data );
     data &= ( uint8_t )~FIFO_CONFIG5_WM_GT_TH_EN;
     rc |= inv_imu_write_reg( &icm_driver, FIFO_CONFIG5_MREG1, 1, &data );
-    // Disable APEX to use 2.25kB of fifo for raw data
-    data = SENSOR_CONFIG3_APEX_DISABLE_MASK;
-    rc |= inv_imu_write_reg( &icm_driver, SENSOR_CONFIG3_MREG1, 1, &data );
+    // // Disable APEX to use 2.25kB of fifo for raw data
+    // TODO: DEL
+    // data = SENSOR_CONFIG3_APEX_DISABLE_MASK;
+    // rc |= inv_imu_write_reg(&icm_driver, SENSOR_CONFIG3_MREG1, 1, &data);
     return rc;
 }
 
@@ -367,7 +369,8 @@ int ICM42670::initApex( uint8_t intpin, ICM42670_irq_handler handler )
     inv_imu_apex_parameters_t apex_inputs;
 
     /* Disabling FIFO usage to optimize power consumption */
-    rc |= inv_imu_configure_fifo( &icm_driver, INV_IMU_FIFO_DISABLED );
+    // TODO: DEL
+    // rc |= inv_imu_configure_fifo(&icm_driver, INV_IMU_FIFO_DISABLED);
 
     /* Enable accel in LP mode */
     rc |= inv_imu_enable_accel_low_power_mode( &icm_driver );

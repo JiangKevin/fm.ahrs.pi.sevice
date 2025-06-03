@@ -16,6 +16,9 @@ rapidcsv::Document         read_csv_doc_( "data.csv" );
 WebSocketServer            server;
 xioTechnologiesCalculation ahrs_calculation_;
 static int                 read_csv_row_index = 0;
+//
+MMC56x3  sensor_mmc_;
+ICM42670 sensor_imu_;
 // 信号处理函数
 static void signalHandler_for_gloab( int signum )
 {
@@ -24,6 +27,44 @@ static void signalHandler_for_gloab( int signum )
     close_out_csv( csv_doc_ );
     // 退出程序
     exit( signum );
+}
+//
+static void event_cb( inv_imu_sensor_event_t* evt )
+{
+    // Format data for Serial Plotter
+    if ( sensor_imu_.isAccelDataValid( evt ) && sensor_imu_.isGyroDataValid( evt ) )
+    {
+        // Format data for Serial Plotter
+        printf( "Time:%u,", evt->timestamp_fsync );
+        printf( "AccelX:%f,", evt->accel[ 0 ] / 2048.0 );
+        printf( "AccelY:%f,", evt->accel[ 1 ] / 2048.0 );
+        printf( "AccelZ:%f,", evt->accel[ 2 ] / 2048.0 );
+        printf( "GyroX:%f,", evt->gyro[ 0 ] / 16.4 );
+        printf( "GyroY:%f,", evt->gyro[ 1 ] / 16.4 );
+        printf( "GyroZ:%f,", evt->gyro[ 2 ] / 16.4 );
+        printf( "Temperature:%f", ( evt->temperature / 128.0 ) + 25.0 );
+        printf( "\n" );
+    }
+}
+// fifo 数据读取回调函数
+static void irq_handler( void )
+{
+    sensor_imu_.getDataFromFifo( event_cb );
+    //
+    uint32_t    step_count   = 0;
+    float       step_cadence = 0;
+    const char* activity     = nullptr;
+
+    if ( sensor_imu_.getPedometer( step_count, step_cadence, activity ) == 0 )
+    {
+        printf( "Step count:%d\n", step_count );
+        printf( "Step cadence:%f(steps/sec)\n", step_cadence );
+        printf( "activity:%s\n", activity ? activity : "" );
+    }
+    if ( sensor_imu_.getTilt() )
+    {
+        printf( "TILT:%s\n", "true" );
+    }
 }
 //
 int main()
@@ -37,9 +78,7 @@ int main()
     int index = 0;
     // 注册信号处理函数，处理 SIGINT 信号（Ctrl+C 产生的信号）
     std::signal( SIGINT, signalHandler_for_gloab );
-    //
-    MMC56x3  sensor_mmc_;
-    ICM42670 sensor_imu_;
+
     //
     EIGEN_SENSOR_DATA sensor_data_;
     EIGEN_SENSOR_DATA original_sensor_data_;
@@ -135,6 +174,38 @@ int main()
                     std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
                 }
             }
+        }
+        else if ( startsWith( server.commond_, "FifoStart" ) )
+        {
+            start_dalta_index++;
+            ahrs_calculation_.start_time = server.start_time;
+            //
+            sensor_data_.ToFusionZero();
+            original_sensor_data_.ToFusionZero();
+            // 读取 FIFO 数据
+            ahrs_calculation_.ResetInitFusion();
+            ahrs_calculation_.ResetInitial();
+            //
+            int ret = sensor_imu_.begin( false, ICM42670_I2C_ADDRESS, "/dev/i2c-1" );
+            if ( ret != 0 )
+            {
+                perror( "ICM42670 initialization failed: " );
+                return -1;
+            }
+            // Enable interrupt on pin 17, Fifo watermark=10
+            sensor_imu_.enableFifoInterrupt( 17, irq_handler, 10 );
+            // Accel ODR = 100 Hz and Full Scale Range = 16G
+            sensor_imu_.startAccel( 100, 16 );
+            // Gyro ODR = 100 Hz and Full Scale Range = 2000 dps
+            sensor_imu_.startGyro( 100, 2000 );
+            // Pedometer enabled
+            sensor_imu_.startPedometer();
+            // Tilt enabled
+            sensor_imu_.startTiltDetection();
+            //
+            sensor_imu_.monitor.detach();
+            //
+            server.commond_ = "";
         }
         else if ( startsWith( server.commond_, "Pause" ) )
         {
