@@ -144,10 +144,6 @@ int main()
                         //
                         std::string command = "AfterCalculation:|";
                         command += sensor_data_.to_json_string();
-                        // 
-                        EIGEN_SENSOR_DATA xxx;
-                        xxx.getValueFromJsonString( command );
-
                         server.handleSend( command );
                         //
                         command = "BeforCalculation:|";
