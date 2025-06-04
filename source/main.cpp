@@ -17,6 +17,7 @@ WebSocketServer            server;
 xioTechnologiesCalculation ahrs_calculation_;
 static int                 read_csv_row_index = 0;
 bool                       is_read_sensor     = false;
+SQLite::Database           db( "db.db3", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE );
 //
 EIGEN_SENSOR_DATA sensor_data_;
 EIGEN_SENSOR_DATA original_sensor_data_;
@@ -56,7 +57,8 @@ int main()
     std::this_thread::sleep_for( std::chrono::seconds( 3 ) );
     //
     init_out_csv( csv_doc_ );
-
+    //
+    create_magnetometer_table( db );
     // 注册信号处理函数，处理 SIGINT 信号（Ctrl+C 产生的信号）
     std::signal( SIGINT, signalHandler_for_gloab );
 
@@ -171,6 +173,23 @@ int main()
             // sensor_imu_.monitor.detach();
             //
             server.commond_ = "";
+        }
+        else if ( startsWith( server.commond_, "Fingerprint" ) )
+        {
+            char  delimiter = ',';
+            auto  values    = splitString( server.commond_, delimiter );
+            float x = 0.0f, y = 0.0f, z = 0.0f;
+            if ( values.size() >= 4 )
+            {
+                // 解析指纹数据
+                x = std::stof( values[ 1 ] );
+                y = std::stof( values[ 2 ] );
+                z = std::stof( values[ 3 ] );
+                //
+                insert_magnetometer_table( db, sensor_data_, x, y, z );
+            }
+            //
+            server.commond_ = "Start";
         }
         else if ( startsWith( server.commond_, "Pause" ) )
         {

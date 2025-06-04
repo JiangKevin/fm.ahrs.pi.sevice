@@ -2,10 +2,14 @@
 //
 #include "Calculation/FromXioTechnologies/xioTechnologiesCalculation.h"
 #include "Calculation/comput.h"
+#include "Calculation/sensor_db.h"
 #include "MMC56x3/MMC56x3.h"
 #include "TDK40607P/ICM42670P.h"
 #include "concurrentqueue/concurrentqueue.h"
 #include "websocket/websocket_server.hpp"
+#include <GeographicLib/Geocentric.hpp>
+#include <GeographicLib/LocalCartesian.hpp>
+#include <SQLiteCpp/SQLiteCpp.h>
 #include <csignal>
 #include <iostream>
 #include <rapidcsv.h>
@@ -13,6 +17,7 @@
 #include <string_view>
 #include <unistd.h>
 //
+using namespace GeographicLib;
 //
 const std::string i2cDevice         = "/dev/i2c-1";
 uint8_t           deviceAddress_mmc = 0x30;
@@ -224,3 +229,63 @@ static bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, EIGEN_S
     return true;
 }
 //
+static void create_magnetometer_table( SQLite::Database& db )
+{
+    try
+    {
+        SQLite::Statement query( db, "CREATE TABLE IF NOT EXISTS magnetometer ("
+                                     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                     "time TEXT, "
+                                     "mag_x TEXT, "
+                                     "mag_y TEXT, "
+                                     "mag_z TEXT, "
+                                     "rela_x TEXT, "
+                                     "rela_y TEXT, "
+                                     "rela_z TEXT, "
+                                     "lon TEXT, "
+                                     "lat TEXT, "
+                                     "elev TEXT "
+                                     ");" );
+        query.exec();
+    }
+    catch ( const SQLite::Exception& e )
+    {
+        std::cerr << "SQLite error: " << e.what() << std::endl;
+    }
+}
+//
+static void insert_magnetometer_table( SQLite::Database& db, EIGEN_SENSOR_DATA& sensor_data, float rela_x, float rela_y, float rela_z )
+{
+    // 当前点的经纬度和高度，作为局部坐标系的原点
+    double            origin_latitude  = 29.116543;   // 纬度
+    double            origin_longitude = 111.506270;  // 经度
+    double            origin_height    = 0.0;         // 高度
+    const Geocentric& earth            = Geocentric::WGS84();
+    LocalCartesian    proj( origin_latitude, origin_longitude, origin_height, earth );
+    //
+    double lon, lat, elev;
+    // 转换为局部直角坐标系
+    proj.Forward( rela_y, rela_x, rela_z, lon, lat, elev );
+    //
+    try
+    {
+        SQLite::Statement query( db, "INSERT INTO magnetometer (time, mag_x, mag_y, mag_z, rela_x, rela_y, rela_z, lon, lat, elev) "
+                                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);" );
+        // 这里需要填入实际的值
+        query.bind( 1, std::to_string( sensor_data.time ) );      // 示例时间
+        query.bind( 2, std::to_string( sensor_data.mag[ 0 ] ) );  // 示例磁力计数据
+        query.bind( 3, std::to_string( sensor_data.mag[ 1 ] ) );
+        query.bind( 4, std::to_string( sensor_data.mag[ 2 ] ) );
+        query.bind( 5, std::to_string( rela_x ) );  // 示例相对方向数据
+        query.bind( 6, std::to_string( rela_y ) );
+        query.bind( 7, std::to_string( rela_z ) );
+        query.bind( 8, std::to_string( lon ) );    // 示例经度
+        query.bind( 9, std::to_string( lat ) );    // 示例纬度
+        query.bind( 10, std::to_string( elev ) );  // 示例海拔高度
+        query.exec();
+    }
+    catch ( const SQLite::Exception& e )
+    {
+        std::cerr << "SQLite error: " << e.what() << std::endl;
+    }
+}

@@ -29,7 +29,8 @@ find_path(RAPIDCSV_INCLUDE_DIRS "rapidcsv.h")
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(unofficial-concurrentqueue CONFIG REQUIRED)
 find_package(Eigen3 CONFIG REQUIRED)
-
+find_package(SQLiteCpp CONFIG REQUIRED)
+find_package (GeographicLib CONFIG REQUIRED)
 #
 # 查找源文件
 file(GLOB app_src
@@ -59,4 +60,6 @@ target_link_libraries(${app_name} PUBLIC
     $ENV{FmDev}/libs/libgpiod/lib/libgpiod.a
     $ENV{FmDev}/libs/openkf/lib/libOpenKF.a
     Eigen3::Eigen
+    SQLiteCpp
+    ${GeographicLib_LIBRARIES}
 )
