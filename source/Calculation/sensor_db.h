@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cmath>
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <sstream>
 #include <string>
 #include <sys/time.h>
@@ -107,7 +108,24 @@ struct EIGEN_SENSOR_DATA
     Eigen::VectorXf pos       = Eigen::VectorXf::Zero( 3 );
     float           deltaTime = 0.0f;
     float           totalAcc  = 0.0f;
-
+    //
+    std::string to_json_string()
+    {
+        nlohmann::json j;
+        j[ "time" ]      = time;
+        j[ "acc" ]       = { acc[ 0 ], acc[ 1 ], acc[ 2 ] };
+        j[ "gyr" ]       = { gyr[ 0 ], gyr[ 1 ], gyr[ 2 ] };
+        j[ "mag" ]       = { mag[ 0 ], mag[ 1 ], mag[ 2 ] };
+        j[ "qua" ]       = { qua[ 0 ], qua[ 1 ], qua[ 2 ], qua[ 3 ] };
+        j[ "eul" ]       = { eul[ 0 ], eul[ 1 ], eul[ 2 ] };
+        j[ "eacc" ]      = { eacc[ 0 ], eacc[ 1 ], eacc[ 2 ] };
+        j[ "vel" ]       = { vel[ 0 ], vel[ 1 ], vel[ 2 ] };
+        j[ "pos" ]       = { pos[ 0 ], pos[ 1 ], pos[ 2 ] };
+        j[ "deltaTime" ] = deltaTime;
+        j[ "totalAcc" ]  = totalAcc;
+        //
+        return j.dump();
+    }
     //
     std::string to_string()
     {
@@ -142,6 +160,49 @@ struct EIGEN_SENSOR_DATA
         info += "totalAcc: (" + transaction_to_string( totalAcc ) + ")\n";
 
         return info;
+    }
+    //
+    void getValueFromJsonString( std::string v )
+    {
+        char delimiter = '|';
+        auto values    = splitString( v, delimiter );
+        //
+        if ( values.size() == 2 )
+        {
+            std::stringstream ss( values[ 1 ] );
+            // std::cout << "Json String: " << values[ 1 ] << std::endl;
+            nlohmann::json j = nlohmann::json::parse( ss, nullptr, false );
+            //
+            time      = j[ "time" ].get< int64_t >();
+            acc[ 0 ]  = j[ "acc" ][ 0 ].get< float >();
+            acc[ 1 ]  = j[ "acc" ][ 1 ].get< float >();
+            acc[ 2 ]  = j[ "acc" ][ 2 ].get< float >();
+            gyr[ 0 ]  = j[ "gyr" ][ 0 ].get< float >();
+            gyr[ 1 ]  = j[ "gyr" ][ 1 ].get< float >();
+            gyr[ 2 ]  = j[ "gyr" ][ 2 ].get< float >();
+            mag[ 0 ]  = j[ "mag" ][ 0 ].get< float >();
+            mag[ 1 ]  = j[ "mag" ][ 1 ].get< float >();
+            mag[ 2 ]  = j[ "mag" ][ 2 ].get< float >();
+            qua[ 0 ]  = j[ "qua" ][ 0 ].get< float >();
+            qua[ 1 ]  = j[ "qua" ][ 1 ].get< float >();
+            qua[ 2 ]  = j[ "qua" ][ 2 ].get< float >();
+            qua[ 3 ]  = j[ "qua" ][ 3 ].get< float >();
+            eul[ 0 ]  = j[ "eul" ][ 0 ].get< float >();
+            eul[ 1 ]  = j[ "eul" ][ 1 ].get< float >();
+            eul[ 2 ]  = j[ "eul" ][ 2 ].get< float >();
+            eacc[ 0 ] = j[ "eacc" ][ 0 ].get< float >();
+            eacc[ 1 ] = j[ "eacc" ][ 1 ].get< float >();
+            eacc[ 2 ] = j[ "eacc" ][ 2 ].get< float >();
+            vel[ 0 ]  = j[ "vel" ][ 0 ].get< float >();
+            vel[ 1 ]  = j[ "vel" ][ 1 ].get< float >();
+            vel[ 2 ]  = j[ "vel" ][ 2 ].get< float >();
+            pos[ 0 ]  = j[ "pos" ][ 0 ].get< float >();
+            pos[ 1 ]  = j[ "pos" ][ 1 ].get< float >();
+            pos[ 2 ]  = j[ "pos" ][ 2 ].get< float >();
+            deltaTime = j[ "deltaTime" ].get< float >();
+            totalAcc  = j[ "totalAcc" ].get< float >();
+            //
+        }
     }
     //
     void getValueFromString( std::string v )
@@ -280,77 +341,16 @@ struct EIGEN_MAG_FIELD_FINGERPRINT
     std::string n_zoon;
     //
     std::vector< MAG_FIELD_FINGERPRINT > mag_field_fingerprints;
-    //
-    MAG_FIELD_FINGERPRINT& findNearest( float x, float y, float z )
-    {
-        Eigen::VectorXf query( 3 );
-        query << x, y, z;
-        //
-        if ( query.size() != 3 )
-        {
-            throw std::invalid_argument( "Query vector must be 3D (mag_x, mag_y, mag_z)" );
-        }
 
-        if ( mag_field_fingerprints.empty() )
-        {
-            throw std::out_of_range( "Fingerprint database is empty" );
-        }
-
-        size_t nearest_idx  = 0;
-        float  min_distance = std::numeric_limits< float >::max();
-
-        for ( size_t i = 0; i < mag_field_fingerprints.size(); ++i )
-        {
-            const auto&     fp = mag_field_fingerprints[ i ];
-            Eigen::Vector3f mag_vector( fp.mag_x, fp.mag_y, fp.mag_z );
-            float           distance = ( query.head< 3 >() - mag_vector ).norm();
-
-            if ( distance < min_distance )
-            {
-                min_distance = distance;
-                nearest_idx  = i;
-            }
-        }
-
-        return mag_field_fingerprints[ nearest_idx ];
-    }
-    //
-    MAG_FIELD_FINGERPRINT& findNearest_eigen( Eigen::VectorXf query )
-    {
-        //
-        if ( query.size() != 3 )
-        {
-            throw std::invalid_argument( "Query vector must be 3D (mag_x, mag_y, mag_z)" );
-        }
-
-        if ( mag_field_fingerprints.empty() )
-        {
-            throw std::out_of_range( "Fingerprint database is empty" );
-        }
-
-        size_t nearest_idx  = 0;
-        float  min_distance = std::numeric_limits< float >::max();
-
-        for ( size_t i = 0; i < mag_field_fingerprints.size(); ++i )
-        {
-            const auto&     fp = mag_field_fingerprints[ i ];
-            Eigen::Vector3f mag_vector( fp.mag_x, fp.mag_y, fp.mag_z );
-            float           distance = ( query.head< 3 >() - mag_vector ).norm();
-
-            if ( distance < min_distance )
-            {
-                min_distance = distance;
-                nearest_idx  = i;
-            }
-        }
-
-        return mag_field_fingerprints[ nearest_idx ];
-    }
     //
     void findNearest_esd( EIGEN_SENSOR_DATA& esd, float threshold_distance )
     {
-        Eigen::VectorXf query( 3 );
-        query << esd.mag[ 0 ], esd.mag[ 1 ], esd.mag[ 2 ];
+        Eigen::VectorXf query_original( 3 );
+        query_original << esd.mag[ 0 ], esd.mag[ 1 ], esd.mag[ 2 ];
+        // 使用四元数旋转向量
+        // 四元数的构造函数为 w, x, y, z
+        Eigen::Quaternionf rotationQuaternion( esd.qua[ 3 ], esd.qua[ 0 ], esd.qua[ 1 ], esd.qua[ 2 ] );
+        Eigen::Vector3f    query = rotationQuaternion * query_original;
         //
         if ( query.size() != 3 )
         {

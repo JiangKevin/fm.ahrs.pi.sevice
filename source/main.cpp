@@ -119,6 +119,7 @@ int main()
             }
             //
         }
+
         else if ( startsWith( server.commond_, "Start" ) )
         {
             start_dalta_index++;
@@ -139,17 +140,18 @@ int main()
                     if ( calcula_ret )
                     {
                         //
-                        mag_field_fingerprint_.findNearest_esd( sensor_data_,10.0f );
-                        // printf( "+-: %s\n", mag_nearest.to_string().c_str() );
-                        // sensor_data_.pos << mag_nearest.rela_x, mag_nearest.rela_y, mag_nearest.rela_z;
+                        // mag_field_fingerprint_.findNearest_esd( sensor_data_, 10.0f );
                         //
-                        std::string command = "AfterCalculation:";
-                        command += sensor_data_.to_string();
-                        // printf("%s\n",command.c_str());
+                        std::string command = "AfterCalculation:|";
+                        command += sensor_data_.to_json_string();
+                        // 
+                        EIGEN_SENSOR_DATA xxx;
+                        xxx.getValueFromJsonString( command );
+
                         server.handleSend( command );
                         //
-                        command = "BeforCalculation:";
-                        command += original_sensor_data_.to_string();
+                        command = "BeforCalculation:|";
+                        command += original_sensor_data_.to_json_string();
                         server.handleSend( command );
                         //
                         if ( csv_index < 100000 )
