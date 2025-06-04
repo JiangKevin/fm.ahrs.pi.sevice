@@ -11,13 +11,15 @@
 #include <string_view>
 #include <unistd.h>
 //
-rapidcsv::Document         csv_doc_;
-rapidcsv::Document         read_csv_doc_( "data.csv" );
-WebSocketServer            server;
-xioTechnologiesCalculation ahrs_calculation_;
-static int                 read_csv_row_index = 0;
-bool                       is_read_sensor     = false;
-SQLite::Database           db( "db.db3", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE );
+rapidcsv::Document          csv_doc_;
+rapidcsv::Document          read_csv_doc_( "data.csv" );
+WebSocketServer             server;
+xioTechnologiesCalculation  ahrs_calculation_;
+static int                  read_csv_row_index = 0;
+bool                        is_read_sensor     = false;
+SQLite::Database            db( "db.db3", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE );
+EIGEN_MAG_FIELD_FINGERPRINT mag_field_fingerprint_;
+std::string                 current_region = "0";
 //
 EIGEN_SENSOR_DATA sensor_data_;
 EIGEN_SENSOR_DATA original_sensor_data_;
@@ -59,6 +61,7 @@ int main()
     init_out_csv( csv_doc_ );
     //
     create_magnetometer_table( db );
+    select_magnetometer_table( db, current_region, mag_field_fingerprint_ );
     // 注册信号处理函数，处理 SIGINT 信号（Ctrl+C 产生的信号）
     std::signal( SIGINT, signalHandler_for_gloab );
 
@@ -179,14 +182,17 @@ int main()
             char  delimiter = ',';
             auto  values    = splitString( server.commond_, delimiter );
             float x = 0.0f, y = 0.0f, z = 0.0f;
-            if ( values.size() >= 4 )
+            //
+            if ( values.size() >= 10 )
             {
                 // 解析指纹数据
                 x = std::stof( values[ 1 ] );
                 y = std::stof( values[ 2 ] );
                 z = std::stof( values[ 3 ] );
                 //
-                insert_magnetometer_table( db, sensor_data_, x, y, z );
+                insert_magnetometer_table( db, sensor_data_, x, y, z, values[ 4 ], values[ 5 ], values[ 6 ], values[ 7 ], values[ 8 ], values[ 9 ], values[ 10 ] );
+                //
+                select_magnetometer_table( db, current_region, mag_field_fingerprint_ );
             }
             //
             server.commond_ = "Start";

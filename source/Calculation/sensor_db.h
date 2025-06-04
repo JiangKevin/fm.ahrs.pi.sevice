@@ -239,3 +239,29 @@ struct EIGEN_SENSOR_DATA
         totalAcc  = 0.0f;
     }
 };
+//
+struct MAG_FIELD_FINGERPRINT
+{
+    float  mag_x  = 0.0f;
+    float  mag_y  = 0.0f;
+    float  mag_z  = 0.0f;
+    float  rela_x = 0.0f;  // 相对方向
+    float  rela_y = 0.0f;
+    float  rela_z = 0.0f;  // 相对方向
+    double lon    = 0.0f;  // 经度
+    double lat    = 0.0f;  // 纬度
+    double elev   = 0.0f;  // 海拔高度
+};
+// 磁场指纹结构
+struct EIGEN_MAG_FIELD_FINGERPRINT
+{
+    std::string c_zoon;
+    std::string t_zoon;
+    std::string b_zoon;
+    std::string e_zoon;
+    std::string s_zoon;
+    std::string w_zoon;
+    std::string n_zoon;
+    //
+    std::vector< MAG_FIELD_FINGERPRINT > mag_field_fingerprints;
+};

@@ -24,6 +24,7 @@ uint8_t           deviceAddress_mmc = 0x30;
 uint8_t           deviceAddress_imu = 0x69;
 std::string       host              = "127.0.0.1";
 std::string       port              = "18080";
+
 //
 static void init_out_csv( rapidcsv::Document& csv_doc )
 {
@@ -244,7 +245,14 @@ static void create_magnetometer_table( SQLite::Database& db )
                                      "rela_z TEXT, "
                                      "lon TEXT, "
                                      "lat TEXT, "
-                                     "elev TEXT "
+                                     "elev TEXT, "
+                                     "c_zoon TEXT, "
+                                     "t_zoon TEXT, "
+                                     "b_zoon TEXT, "
+                                     "e_zoon TEXT, "
+                                     "s_zoon TEXT, "
+                                     "w_zoon TEXT, "
+                                     "n_zoon TEXT "
                                      ");" );
         query.exec();
     }
@@ -254,7 +262,7 @@ static void create_magnetometer_table( SQLite::Database& db )
     }
 }
 //
-static void insert_magnetometer_table( SQLite::Database& db, EIGEN_SENSOR_DATA& sensor_data, float rela_x, float rela_y, float rela_z )
+static void insert_magnetometer_table( SQLite::Database& db, EIGEN_SENSOR_DATA& sensor_data, float rela_x, float rela_y, float rela_z, std::string c_zoon, std::string t_zoon, std::string b_zoon, std::string e_zoon, std::string s_zoon, std::string w_zoon, std::string n_zoon )
 {
     // 当前点的经纬度和高度，作为局部坐标系的原点
     double            origin_latitude  = 29.116543;   // 纬度
@@ -269,8 +277,8 @@ static void insert_magnetometer_table( SQLite::Database& db, EIGEN_SENSOR_DATA& 
     //
     try
     {
-        SQLite::Statement query( db, "INSERT INTO magnetometer (time, mag_x, mag_y, mag_z, rela_x, rela_y, rela_z, lon, lat, elev) "
-                                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);" );
+        SQLite::Statement query( db, "INSERT INTO magnetometer (time, mag_x, mag_y, mag_z, rela_x, rela_y, rela_z, lon, lat, elev, c_zoon, t_zoon, b_zoon, e_zoon, s_zoon, w_zoon, n_zoon) "
+                                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);" );
         // 这里需要填入实际的值
         query.bind( 1, std::to_string( sensor_data.time ) );      // 示例时间
         query.bind( 2, std::to_string( sensor_data.mag[ 0 ] ) );  // 示例磁力计数据
@@ -282,7 +290,56 @@ static void insert_magnetometer_table( SQLite::Database& db, EIGEN_SENSOR_DATA& 
         query.bind( 8, std::to_string( lon ) );    // 示例经度
         query.bind( 9, std::to_string( lat ) );    // 示例纬度
         query.bind( 10, std::to_string( elev ) );  // 示例海拔高度
+        query.bind( 11, c_zoon );
+        query.bind( 12, t_zoon );
+        query.bind( 13, b_zoon );
+        query.bind( 14, e_zoon );
+        query.bind( 15, s_zoon );
+        query.bind( 16, w_zoon );
+        query.bind( 17, n_zoon );
         query.exec();
+    }
+    catch ( const SQLite::Exception& e )
+    {
+        std::cerr << "SQLite error: " << e.what() << std::endl;
+    }
+}
+//
+static void select_magnetometer_table( SQLite::Database& db, std::string c_zoon, EIGEN_MAG_FIELD_FINGERPRINT& efff )
+{
+    try
+    {
+        SQLite::Statement query( db, "SELECT * FROM magnetometer where c_zoon = ?;" );
+        // Bind the integer value 6 to the first parameter of the SQL query
+        query.bind( 1, c_zoon );
+        //
+        efff.mag_field_fingerprints.clear();
+        // 执行查询
+        while ( query.executeStep() )
+        {
+            MAG_FIELD_FINGERPRINT new_mff;
+            // 获取每一行的数据
+            new_mff.mag_x  = std::stof( query.getColumn( 2 ).getText() );
+            new_mff.mag_y  = std::stof( query.getColumn( 3 ).getText() );
+            new_mff.mag_z  = std::stof( query.getColumn( 4 ).getText() );
+            new_mff.rela_x = std::stof( query.getColumn( 5 ).getText() );
+            new_mff.rela_y = std::stof( query.getColumn( 6 ).getText() );
+            new_mff.rela_z = std::stof( query.getColumn( 7 ).getText() );
+            new_mff.lon    = std::stod( query.getColumn( 8 ).getText() );
+            new_mff.lat    = std::stod( query.getColumn( 9 ).getText() );
+            new_mff.elev   = std::stod( query.getColumn( 10 ).getText() );
+
+            //
+            efff.mag_field_fingerprints.push_back( new_mff );
+            //
+            efff.c_zoon = query.getColumn( 11 ).getText();
+            efff.t_zoon = query.getColumn( 12 ).getText();
+            efff.b_zoon = query.getColumn( 13 ).getText();
+            efff.e_zoon = query.getColumn( 14 ).getText();
+            efff.s_zoon = query.getColumn( 15 ).getText();
+            efff.w_zoon = query.getColumn( 16 ).getText();
+            efff.n_zoon = query.getColumn( 17 ).getText();
+        }
     }
     catch ( const SQLite::Exception& e )
     {
