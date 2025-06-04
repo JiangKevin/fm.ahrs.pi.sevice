@@ -139,6 +139,10 @@ int main()
                     if ( calcula_ret )
                     {
                         //
+                        mag_field_fingerprint_.findNearest_esd( sensor_data_,10.0f );
+                        // printf( "+-: %s\n", mag_nearest.to_string().c_str() );
+                        // sensor_data_.pos << mag_nearest.rela_x, mag_nearest.rela_y, mag_nearest.rela_z;
+                        //
                         std::string command = "AfterCalculation:";
                         command += sensor_data_.to_string();
                         // printf("%s\n",command.c_str());

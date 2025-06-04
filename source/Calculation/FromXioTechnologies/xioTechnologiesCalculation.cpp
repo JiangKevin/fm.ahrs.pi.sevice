@@ -138,6 +138,8 @@ bool xioTechnologiesCalculation::Mul_CalculateVelAndPos( EIGEN_SENSOR_DATA* sens
     sensor_data->pos[ 0 ] += ( sensor_data->vel[ 0 ] * dt );
     sensor_data->pos[ 1 ] += ( sensor_data->vel[ 1 ] * dt );
     sensor_data->pos[ 2 ] += ( sensor_data->vel[ 2 ] * dt );
+    // 
+    
 
     //
     return true;

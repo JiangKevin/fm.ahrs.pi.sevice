@@ -251,6 +251,22 @@ struct MAG_FIELD_FINGERPRINT
     double lon    = 0.0f;  // 经度
     double lat    = 0.0f;  // 纬度
     double elev   = 0.0f;  // 海拔高度
+    //
+    std::string to_string()
+    {
+        std::ostringstream oss;
+        oss << "Magnetic Field Fingerprint: "
+            << "mag_x: " << mag_x << ", "
+            << "mag_y: " << mag_y << ", "
+            << "mag_z: " << mag_z << ", "
+            << "rela_x: " << rela_x << ", "
+            << "rela_y: " << rela_y << ", "
+            << "rela_z: " << rela_z << ", "
+            << "lon: " << lon << ", "
+            << "lat: " << lat << ", "
+            << "elev: " << elev;
+        return oss.str();
+    }
 };
 // 磁场指纹结构
 struct EIGEN_MAG_FIELD_FINGERPRINT
@@ -264,4 +280,110 @@ struct EIGEN_MAG_FIELD_FINGERPRINT
     std::string n_zoon;
     //
     std::vector< MAG_FIELD_FINGERPRINT > mag_field_fingerprints;
+    //
+    MAG_FIELD_FINGERPRINT& findNearest( float x, float y, float z )
+    {
+        Eigen::VectorXf query( 3 );
+        query << x, y, z;
+        //
+        if ( query.size() != 3 )
+        {
+            throw std::invalid_argument( "Query vector must be 3D (mag_x, mag_y, mag_z)" );
+        }
+
+        if ( mag_field_fingerprints.empty() )
+        {
+            throw std::out_of_range( "Fingerprint database is empty" );
+        }
+
+        size_t nearest_idx  = 0;
+        float  min_distance = std::numeric_limits< float >::max();
+
+        for ( size_t i = 0; i < mag_field_fingerprints.size(); ++i )
+        {
+            const auto&     fp = mag_field_fingerprints[ i ];
+            Eigen::Vector3f mag_vector( fp.mag_x, fp.mag_y, fp.mag_z );
+            float           distance = ( query.head< 3 >() - mag_vector ).norm();
+
+            if ( distance < min_distance )
+            {
+                min_distance = distance;
+                nearest_idx  = i;
+            }
+        }
+
+        return mag_field_fingerprints[ nearest_idx ];
+    }
+    //
+    MAG_FIELD_FINGERPRINT& findNearest_eigen( Eigen::VectorXf query )
+    {
+        //
+        if ( query.size() != 3 )
+        {
+            throw std::invalid_argument( "Query vector must be 3D (mag_x, mag_y, mag_z)" );
+        }
+
+        if ( mag_field_fingerprints.empty() )
+        {
+            throw std::out_of_range( "Fingerprint database is empty" );
+        }
+
+        size_t nearest_idx  = 0;
+        float  min_distance = std::numeric_limits< float >::max();
+
+        for ( size_t i = 0; i < mag_field_fingerprints.size(); ++i )
+        {
+            const auto&     fp = mag_field_fingerprints[ i ];
+            Eigen::Vector3f mag_vector( fp.mag_x, fp.mag_y, fp.mag_z );
+            float           distance = ( query.head< 3 >() - mag_vector ).norm();
+
+            if ( distance < min_distance )
+            {
+                min_distance = distance;
+                nearest_idx  = i;
+            }
+        }
+
+        return mag_field_fingerprints[ nearest_idx ];
+    }
+    //
+    void findNearest_esd( EIGEN_SENSOR_DATA& esd, float threshold_distance )
+    {
+        Eigen::VectorXf query( 3 );
+        query << esd.mag[ 0 ], esd.mag[ 1 ], esd.mag[ 2 ];
+        //
+        if ( query.size() != 3 )
+        {
+            throw std::invalid_argument( "Query vector must be 3D (mag_x, mag_y, mag_z)" );
+        }
+
+        if ( mag_field_fingerprints.empty() )
+        {
+            throw std::out_of_range( "Fingerprint database is empty" );
+        }
+
+        size_t nearest_idx  = 0;
+        float  min_distance = std::numeric_limits< float >::max();
+
+        for ( size_t i = 0; i < mag_field_fingerprints.size(); ++i )
+        {
+            const auto&     fp = mag_field_fingerprints[ i ];
+            Eigen::Vector3f mag_vector( fp.mag_x, fp.mag_y, fp.mag_z );
+            float           distance = ( query.head< 3 >() - mag_vector ).norm();
+
+            if ( distance < min_distance )
+            {
+                min_distance = distance;
+                nearest_idx  = i;
+            }
+        }
+        //
+        // printf( "Nearest idx: %zu, min_distance: %f\n", nearest_idx, min_distance );
+        if ( min_distance < threshold_distance )
+        {
+            esd.pos[ 0 ] = mag_field_fingerprints[ nearest_idx ].rela_x;
+            esd.pos[ 1 ] = mag_field_fingerprints[ nearest_idx ].rela_y;
+            esd.pos[ 2 ] = mag_field_fingerprints[ nearest_idx ].rela_z;
+        }
+    }
 };
