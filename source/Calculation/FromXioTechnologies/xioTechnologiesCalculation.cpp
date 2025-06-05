@@ -96,14 +96,8 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
     sensor_data->totalAcc  = sensor_data->eacc.norm();
     sensor_data->totalMag  = sensor_data->mag.norm();
     //
-
-    // float norm                = sensor_data->mag.norm();
-    // sensor_data->std_mag[ 0 ] = sensor_data->mag[ 0 ] / norm;
-    // sensor_data->std_mag[ 1 ] = sensor_data->mag[ 1 ] / norm;
-    // sensor_data->std_mag[ 2 ] = sensor_data->mag[ 2 ] / norm;
-
     // // 四元数的构造函数为 w, x, y, z
-    Eigen::Quaternionf rotationQuaternion( sensor_data->qua[ 3 ], sensor_data->qua[ 0 ], sensor_data->qua[ 1 ], sensor_data->qua[ 2 ] );
+    Eigen::Quaternionf rotationQuaternion( sensor_data->qua[ 0 ], sensor_data->qua[ 1 ], sensor_data->qua[ 2 ], sensor_data->qua[ 3 ] );
     // // 归一化四元数（确保四元数是归一化的）
     // rotationQuaternion.normalize();
 
@@ -113,7 +107,7 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
     // //
     // sensor_data->a_std_mag = fm_deviceToENU( a_std_mag_mid, sensor_data->eul[ 0 ], sensor_data->eul[ 1 ], sensor_data->eul[ 2 ] );
 
-    Coordinate::test( sensor_data->mag, rotationQuaternion, sensor_data->std_mag, sensor_data->a_std_mag );
+    // Coordinate::test( sensor_data->mag, rotationQuaternion, sensor_data->std_mag, sensor_data->a_std_mag );
     //
     if ( ! Mul_CalculateVelAndPos( sensor_data, deltaTime, true ) )
     {
