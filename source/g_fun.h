@@ -275,15 +275,28 @@ static void insert_magnetometer_table( SQLite::Database& db, EIGEN_SENSOR_DATA& 
     // 转换为局部直角坐标系
     proj.Forward( rela_y, rela_x, rela_z, lon, lat, elev );
     //
+    float norm       = sensor_data.mag.norm();
+    float mag_x_to_1 = sensor_data.mag[ 0 ] / norm;
+    float mag_y_to_1 = sensor_data.mag[ 1 ] / norm;
+    float mag_z_to_1 = sensor_data.mag[ 2 ] / norm;
+
+    // 磁力计数据归一化
+    if ( norm > 0.0f )
+    {
+        sensor_data.mag[ 0 ] /= norm;
+        sensor_data.mag[ 1 ] /= norm;
+        sensor_data.mag[ 2 ] /= norm;
+    }
+    //
     try
     {
         SQLite::Statement query( db, "INSERT INTO magnetometer (time, mag_x, mag_y, mag_z, rela_x, rela_y, rela_z, lon, lat, elev, c_zoon, t_zoon, b_zoon, e_zoon, s_zoon, w_zoon, n_zoon) "
                                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);" );
         // 这里需要填入实际的值
-        query.bind( 1, std::to_string( sensor_data.time ) );      // 示例时间
-        query.bind( 2, std::to_string( sensor_data.mag[ 0 ] ) );  // 示例磁力计数据
-        query.bind( 3, std::to_string( sensor_data.mag[ 1 ] ) );
-        query.bind( 4, std::to_string( sensor_data.mag[ 2 ] ) );
+        query.bind( 1, std::to_string( sensor_data.time ) );  // 示例时间
+        query.bind( 2, std::to_string( mag_x_to_1 ) );        // 示例磁力计数据
+        query.bind( 3, std::to_string( mag_y_to_1 ) );
+        query.bind( 4, std::to_string( mag_z_to_1 ) );
         query.bind( 5, std::to_string( rela_x ) );  // 示例相对方向数据
         query.bind( 6, std::to_string( rela_y ) );
         query.bind( 7, std::to_string( rela_z ) );
