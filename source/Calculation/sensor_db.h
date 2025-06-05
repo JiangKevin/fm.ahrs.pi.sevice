@@ -108,6 +108,8 @@ struct EIGEN_SENSOR_DATA
     Eigen::VectorXf pos       = Eigen::VectorXf::Zero( 3 );
     float           deltaTime = 0.0f;
     float           totalAcc  = 0.0f;
+    Eigen::VectorXf std_mag   = Eigen::VectorXf::Zero( 3 );
+
     //
     std::string to_json_string()
     {
@@ -123,26 +125,9 @@ struct EIGEN_SENSOR_DATA
         j[ "pos" ]       = { pos[ 0 ], pos[ 1 ], pos[ 2 ] };
         j[ "deltaTime" ] = deltaTime;
         j[ "totalAcc" ]  = totalAcc;
+        j[ "std_mag" ]   = { std_mag[ 0 ], std_mag[ 1 ], std_mag[ 2 ] };
         //
         return j.dump();
-    }
-    //
-    std::string to_string()
-    {
-        std::string str = int64_transaction_to_string( time ) + ",";
-        str += transaction_to_string( acc[ 0 ] ) + "," + transaction_to_string( acc[ 1 ] ) + "," + transaction_to_string( acc[ 2 ] ) + ",";
-        str += transaction_to_string( gyr[ 0 ] ) + "," + transaction_to_string( gyr[ 1 ] ) + "," + transaction_to_string( gyr[ 2 ] ) + ",";
-        str += transaction_to_string( mag[ 0 ] ) + "," + transaction_to_string( mag[ 1 ] ) + "," + transaction_to_string( mag[ 2 ] ) + ",";
-        str += transaction_to_string( qua[ 0 ] ) + "," + transaction_to_string( qua[ 1 ] ) + "," + transaction_to_string( qua[ 2 ] ) + "," + transaction_to_string( qua[ 3 ] ) + ",";
-        str += transaction_to_string( eul[ 0 ] ) + "," + transaction_to_string( eul[ 0 ] ) + "," + transaction_to_string( eul[ 2 ] ) + ",";
-        str += transaction_to_string( eacc[ 0 ] ) + "," + transaction_to_string( eacc[ 1 ] ) + "," + transaction_to_string( eacc[ 2 ] ) + ",";
-        str += transaction_to_string( vel[ 0 ] ) + "," + transaction_to_string( vel[ 1 ] ) + "," + transaction_to_string( vel[ 2 ] ) + ",";
-        str += transaction_to_string( pos[ 0 ] ) + "," + transaction_to_string( pos[ 1 ] ) + "," + transaction_to_string( pos[ 2 ] ) + ",";
-        str += transaction_to_string( deltaTime ) + ",";
-        str += transaction_to_string( totalAcc );
-
-        //
-        return str;
     }
     //
     std::string to_info()
@@ -158,6 +143,7 @@ struct EIGEN_SENSOR_DATA
         info += "Position: (" + transaction_to_string( pos[ 0 ] ) + ", " + transaction_to_string( pos[ 1 ] ) + ", " + transaction_to_string( pos[ 2 ] ) + ")\n";
         info += "deltaTime: (" + transaction_to_string( deltaTime ) + ")\n";
         info += "totalAcc: (" + transaction_to_string( totalAcc ) + ")\n";
+        info += "std_mag: (" + transaction_to_string( std_mag[ 0 ] ) + ", " + transaction_to_string( std_mag[ 1 ] ) + ", " + transaction_to_string( std_mag[ 2 ] ) + ")\n";
 
         return info;
     }
@@ -173,131 +159,102 @@ struct EIGEN_SENSOR_DATA
             // std::cout << "Json String: " << values[ 1 ] << std::endl;
             nlohmann::json j = nlohmann::json::parse( ss, nullptr, false );
             //
-            time      = j[ "time" ].get< int64_t >();
-            acc[ 0 ]  = j[ "acc" ][ 0 ].get< float >();
-            acc[ 1 ]  = j[ "acc" ][ 1 ].get< float >();
-            acc[ 2 ]  = j[ "acc" ][ 2 ].get< float >();
-            gyr[ 0 ]  = j[ "gyr" ][ 0 ].get< float >();
-            gyr[ 1 ]  = j[ "gyr" ][ 1 ].get< float >();
-            gyr[ 2 ]  = j[ "gyr" ][ 2 ].get< float >();
-            mag[ 0 ]  = j[ "mag" ][ 0 ].get< float >();
-            mag[ 1 ]  = j[ "mag" ][ 1 ].get< float >();
-            mag[ 2 ]  = j[ "mag" ][ 2 ].get< float >();
-            qua[ 0 ]  = j[ "qua" ][ 0 ].get< float >();
-            qua[ 1 ]  = j[ "qua" ][ 1 ].get< float >();
-            qua[ 2 ]  = j[ "qua" ][ 2 ].get< float >();
-            qua[ 3 ]  = j[ "qua" ][ 3 ].get< float >();
-            eul[ 0 ]  = j[ "eul" ][ 0 ].get< float >();
-            eul[ 1 ]  = j[ "eul" ][ 1 ].get< float >();
-            eul[ 2 ]  = j[ "eul" ][ 2 ].get< float >();
-            eacc[ 0 ] = j[ "eacc" ][ 0 ].get< float >();
-            eacc[ 1 ] = j[ "eacc" ][ 1 ].get< float >();
-            eacc[ 2 ] = j[ "eacc" ][ 2 ].get< float >();
-            vel[ 0 ]  = j[ "vel" ][ 0 ].get< float >();
-            vel[ 1 ]  = j[ "vel" ][ 1 ].get< float >();
-            vel[ 2 ]  = j[ "vel" ][ 2 ].get< float >();
-            pos[ 0 ]  = j[ "pos" ][ 0 ].get< float >();
-            pos[ 1 ]  = j[ "pos" ][ 1 ].get< float >();
-            pos[ 2 ]  = j[ "pos" ][ 2 ].get< float >();
-            deltaTime = j[ "deltaTime" ].get< float >();
-            totalAcc  = j[ "totalAcc" ].get< float >();
+            time         = j[ "time" ].get< int64_t >();
+            acc[ 0 ]     = j[ "acc" ][ 0 ].get< float >();
+            acc[ 1 ]     = j[ "acc" ][ 1 ].get< float >();
+            acc[ 2 ]     = j[ "acc" ][ 2 ].get< float >();
+            gyr[ 0 ]     = j[ "gyr" ][ 0 ].get< float >();
+            gyr[ 1 ]     = j[ "gyr" ][ 1 ].get< float >();
+            gyr[ 2 ]     = j[ "gyr" ][ 2 ].get< float >();
+            mag[ 0 ]     = j[ "mag" ][ 0 ].get< float >();
+            mag[ 1 ]     = j[ "mag" ][ 1 ].get< float >();
+            mag[ 2 ]     = j[ "mag" ][ 2 ].get< float >();
+            qua[ 0 ]     = j[ "qua" ][ 0 ].get< float >();
+            qua[ 1 ]     = j[ "qua" ][ 1 ].get< float >();
+            qua[ 2 ]     = j[ "qua" ][ 2 ].get< float >();
+            qua[ 3 ]     = j[ "qua" ][ 3 ].get< float >();
+            eul[ 0 ]     = j[ "eul" ][ 0 ].get< float >();
+            eul[ 1 ]     = j[ "eul" ][ 1 ].get< float >();
+            eul[ 2 ]     = j[ "eul" ][ 2 ].get< float >();
+            eacc[ 0 ]    = j[ "eacc" ][ 0 ].get< float >();
+            eacc[ 1 ]    = j[ "eacc" ][ 1 ].get< float >();
+            eacc[ 2 ]    = j[ "eacc" ][ 2 ].get< float >();
+            vel[ 0 ]     = j[ "vel" ][ 0 ].get< float >();
+            vel[ 1 ]     = j[ "vel" ][ 1 ].get< float >();
+            vel[ 2 ]     = j[ "vel" ][ 2 ].get< float >();
+            pos[ 0 ]     = j[ "pos" ][ 0 ].get< float >();
+            pos[ 1 ]     = j[ "pos" ][ 1 ].get< float >();
+            pos[ 2 ]     = j[ "pos" ][ 2 ].get< float >();
+            deltaTime    = j[ "deltaTime" ].get< float >();
+            totalAcc     = j[ "totalAcc" ].get< float >();
+            std_mag[ 0 ] = j[ "std_mag" ][ 0 ].get< float >();
+            std_mag[ 1 ] = j[ "std_mag" ][ 1 ].get< float >();
+            std_mag[ 2 ] = j[ "std_mag" ][ 2 ].get< float >();
             //
-        }
-    }
-    //
-    void getValueFromString( std::string v )
-    {
-        char delimiter = ',';
-        auto values    = splitString( v, delimiter );
-        //
-        if ( values.size() == 28 )
-        {
-            time      = std::stoll( values[ 0 ] );
-            acc[ 0 ]  = std::stof( values[ 1 ] );
-            acc[ 1 ]  = std::stof( values[ 2 ] );
-            acc[ 2 ]  = std::stof( values[ 3 ] );
-            gyr[ 0 ]  = std::stof( values[ 4 ] );
-            gyr[ 1 ]  = std::stof( values[ 5 ] );
-            gyr[ 2 ]  = std::stof( values[ 6 ] );
-            mag[ 0 ]  = std::stof( values[ 7 ] );
-            mag[ 1 ]  = std::stof( values[ 8 ] );
-            mag[ 2 ]  = std::stof( values[ 9 ] );
-            qua[ 0 ]  = std::stof( values[ 10 ] );
-            qua[ 1 ]  = std::stof( values[ 11 ] );
-            qua[ 2 ]  = std::stof( values[ 12 ] );
-            qua[ 3 ]  = std::stof( values[ 13 ] );
-            eul[ 0 ]  = std::stof( values[ 14 ] );
-            eul[ 1 ]  = std::stof( values[ 15 ] );
-            eul[ 2 ]  = std::stof( values[ 16 ] );
-            eacc[ 0 ] = std::stof( values[ 17 ] );
-            eacc[ 1 ] = std::stof( values[ 18 ] );
-            eacc[ 2 ] = std::stof( values[ 19 ] );
-            vel[ 0 ]  = std::stof( values[ 20 ] );
-            vel[ 1 ]  = std::stof( values[ 21 ] );
-            vel[ 2 ]  = std::stof( values[ 22 ] );
-            pos[ 0 ]  = std::stof( values[ 23 ] );
-            pos[ 1 ]  = std::stof( values[ 24 ] );
-            pos[ 2 ]  = std::stof( values[ 25 ] );
-            deltaTime = std::stof( values[ 26 ] );
-            totalAcc  = std::stof( values[ 27 ] );
         }
     }
     //
     void ToZero()
     {
-        time      = 0.0f;
-        acc[ 0 ]  = 0.0f;
-        acc[ 1 ]  = 0.0f;
-        acc[ 2 ]  = 0.0f;
-        gyr[ 0 ]  = 0.0f;
-        gyr[ 1 ]  = 0.0f;
-        gyr[ 2 ]  = 0.0f;
-        mag[ 0 ]  = 0.0f;
-        mag[ 1 ]  = 0.0f;
-        mag[ 2 ]  = 0.0f;
-        qua[ 0 ]  = 0.0f;
-        qua[ 1 ]  = 0.0f;
-        qua[ 2 ]  = 0.0f;
-        qua[ 3 ]  = 0.0f;
-        eul[ 0 ]  = 0.0f;
-        eul[ 1 ]  = 0.0f;
-        eul[ 2 ]  = 0.0f;
-        eacc[ 0 ] = 0.0f;
-        eacc[ 1 ] = 0.0f;
-        eacc[ 2 ] = 0.0f;
-        vel[ 0 ]  = 0.0f;
-        vel[ 1 ]  = 0.0f;
-        vel[ 2 ]  = 0.0f;
-        pos[ 0 ]  = 0.0f;
-        pos[ 1 ]  = 0.0f;
-        pos[ 2 ]  = 0.0f;
-        deltaTime = 0.0f;
-        totalAcc  = 0.0f;
+        time         = 0.0f;
+        acc[ 0 ]     = 0.0f;
+        acc[ 1 ]     = 0.0f;
+        acc[ 2 ]     = 0.0f;
+        gyr[ 0 ]     = 0.0f;
+        gyr[ 1 ]     = 0.0f;
+        gyr[ 2 ]     = 0.0f;
+        mag[ 0 ]     = 0.0f;
+        mag[ 1 ]     = 0.0f;
+        mag[ 2 ]     = 0.0f;
+        qua[ 0 ]     = 0.0f;
+        qua[ 1 ]     = 0.0f;
+        qua[ 2 ]     = 0.0f;
+        qua[ 3 ]     = 0.0f;
+        eul[ 0 ]     = 0.0f;
+        eul[ 1 ]     = 0.0f;
+        eul[ 2 ]     = 0.0f;
+        eacc[ 0 ]    = 0.0f;
+        eacc[ 1 ]    = 0.0f;
+        eacc[ 2 ]    = 0.0f;
+        vel[ 0 ]     = 0.0f;
+        vel[ 1 ]     = 0.0f;
+        vel[ 2 ]     = 0.0f;
+        pos[ 0 ]     = 0.0f;
+        pos[ 1 ]     = 0.0f;
+        pos[ 2 ]     = 0.0f;
+        deltaTime    = 0.0f;
+        totalAcc     = 0.0f;
+        std_mag[ 0 ] = 0.0f;
+        std_mag[ 1 ] = 0.0f;
+        std_mag[ 2 ] = 0.0f;
     }
     //
     void ToFusionZero()
     {
-        time      = 0.0f;
-        acc[ 0 ]  = 0.0f;
-        acc[ 1 ]  = 0.0f;
-        acc[ 2 ]  = 0.0f;
-        gyr[ 0 ]  = 0.0f;
-        gyr[ 1 ]  = 0.0f;
-        gyr[ 2 ]  = 0.0f;
-        mag[ 0 ]  = 0.0f;
-        mag[ 1 ]  = 0.0f;
-        mag[ 2 ]  = 0.0f;
-        qua[ 0 ]  = 0.0f;
-        qua[ 1 ]  = 0.0f;
-        qua[ 2 ]  = 0.0f;
-        qua[ 3 ]  = 0.0f;
-        eul[ 0 ]  = 0.0f;
-        eul[ 1 ]  = 0.0f;
-        eul[ 2 ]  = 0.0f;
-        eacc[ 0 ] = 0.0f;
-        eacc[ 1 ] = 0.0f;
-        eacc[ 2 ] = 0.0f;
-        totalAcc  = 0.0f;
+        time         = 0.0f;
+        acc[ 0 ]     = 0.0f;
+        acc[ 1 ]     = 0.0f;
+        acc[ 2 ]     = 0.0f;
+        gyr[ 0 ]     = 0.0f;
+        gyr[ 1 ]     = 0.0f;
+        gyr[ 2 ]     = 0.0f;
+        mag[ 0 ]     = 0.0f;
+        mag[ 1 ]     = 0.0f;
+        mag[ 2 ]     = 0.0f;
+        qua[ 0 ]     = 0.0f;
+        qua[ 1 ]     = 0.0f;
+        qua[ 2 ]     = 0.0f;
+        qua[ 3 ]     = 0.0f;
+        eul[ 0 ]     = 0.0f;
+        eul[ 1 ]     = 0.0f;
+        eul[ 2 ]     = 0.0f;
+        eacc[ 0 ]    = 0.0f;
+        eacc[ 1 ]    = 0.0f;
+        eacc[ 2 ]    = 0.0f;
+        totalAcc     = 0.0f;
+        std_mag[ 0 ] = 0.0f;
+        std_mag[ 1 ] = 0.0f;
+        std_mag[ 2 ] = 0.0f;
     }
 };
 //

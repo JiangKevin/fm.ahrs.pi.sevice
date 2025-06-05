@@ -1,4 +1,5 @@
 #include "Calculation/comput.h"
+#include "Calculation/vector_rotation.h"
 #include "xioTechnologiesCalculation.h"
 #include <cstdio>
 #include <time.h>
@@ -20,12 +21,17 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
     FusionVector accelerometer = { sensor_data->acc[ 0 ], sensor_data->acc[ 1 ], sensor_data->acc[ 2 ] };
     FusionVector magnetometer  = { sensor_data->mag[ 0 ], sensor_data->mag[ 1 ], sensor_data->mag[ 2 ] };
 
+    std::cout << "Old Gyroscope: " << gyroscope.axis.x << ", " << gyroscope.axis.y << ", " << gyroscope.axis.z << std::endl;
+    std::cout << "Old Accelerometer: " << accelerometer.axis.x << ", " << accelerometer.axis.y << ", " << accelerometer.axis.z << std::endl;
+    std::cout << "Old Magnetometer: " << magnetometer.axis.x << ", " << magnetometer.axis.y << ", " << magnetometer.axis.z << std::endl;
     // Apply calibration
     gyroscope     = FusionCalibrationInertial( gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset );
     accelerometer = FusionCalibrationInertial( accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset );
     magnetometer  = FusionCalibrationMagnetic( magnetometer, softIronMatrix, hardIronOffset );
-
-    // printf("Offset")
+    //
+    std::cout << "New Gyroscope: " << gyroscope.axis.x << ", " << gyroscope.axis.y << ", " << gyroscope.axis.z << std::endl;
+    std::cout << "New Accelerometer: " << accelerometer.axis.x << ", " << accelerometer.axis.y << ", " << accelerometer.axis.z << std::endl;
+    std::cout << "New Magnetometer: " << magnetometer.axis.x << ", " << magnetometer.axis.y << ", " << magnetometer.axis.z << std::endl;
     // Update gyroscope offset correction algorithm
     gyroscope = FusionOffsetUpdate( &offset, gyroscope );
 
@@ -45,7 +51,10 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
     sensor_data->deltaTime          = deltaTime;
     // Update gyroscope AHRS algorithm
     FusionAhrsUpdate( &ahrs, gyroscope, accelerometer, magnetometer, deltaTime );
-
+    //
+    std::cout << "+- Gyroscope: " << gyroscope.axis.x << ", " << gyroscope.axis.y << ", " << gyroscope.axis.z << std::endl;
+    std::cout << "+- Accelerometer: " << accelerometer.axis.x << ", " << accelerometer.axis.y << ", " << accelerometer.axis.z << std::endl;
+    std::cout << "+- Magnetometer: " << magnetometer.axis.x << ", " << magnetometer.axis.y << ", " << magnetometer.axis.z << std::endl;
     // Print algorithm outputs
     auto               quate = FusionAhrsGetQuaternion( &ahrs );
     const FusionEuler  euler = FusionQuaternionToEuler( quate );
@@ -85,6 +94,14 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
     sensor_data->eacc[ 1 ] = earth.axis.y;
     sensor_data->eacc[ 2 ] = earth.axis.z;
     sensor_data->totalAcc  = sensor_data->eacc.norm();
+
+    //
+    Eigen::VectorXf query_original( 3 );
+    query_original << sensor_data->mag[ 0 ], sensor_data->mag[ 1 ], sensor_data->mag[ 2 ];
+    Eigen::Vector3f rotatedVector = fm_rotateVector( query_original, sensor_data->eul[ 0 ], sensor_data->eul[ 1 ], sensor_data->eul[ 2 ], RotationOrder::XZY );
+    sensor_data->std_mag[ 0 ]     = rotatedVector[ 0 ];
+    sensor_data->std_mag[ 1 ]     = rotatedVector[ 1 ];
+    sensor_data->std_mag[ 2 ]     = rotatedVector[ 2 ];
 
     //
     if ( ! Mul_CalculateVelAndPos( sensor_data, deltaTime, true ) )
@@ -138,8 +155,7 @@ bool xioTechnologiesCalculation::Mul_CalculateVelAndPos( EIGEN_SENSOR_DATA* sens
     sensor_data->pos[ 0 ] += ( sensor_data->vel[ 0 ] * dt );
     sensor_data->pos[ 1 ] += ( sensor_data->vel[ 1 ] * dt );
     sensor_data->pos[ 2 ] += ( sensor_data->vel[ 2 ] * dt );
-    // 
-    
+    //
 
     //
     return true;

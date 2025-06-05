@@ -108,9 +108,8 @@ int main()
                     //
                     if ( calcula_ret )
                     {
-                        std::string command = "AfterCalculation:";
-                        command += sensor_data_.to_string();
-                        // printf("%s\n",command.c_str());
+                        std::string command = "AfterCalculation:|";
+                        command += sensor_data_.to_json_string();
                         server.handleSend( command );
                     }
                     // Run @ ODR 100Hz:10
