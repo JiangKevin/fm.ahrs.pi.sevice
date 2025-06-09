@@ -2,6 +2,7 @@
 #include "Calculation/vector_rotation.h"
 #include "xioTechnologiesCalculation.h"
 #include <cstdio>
+#include <fstream>
 #include <time.h>
 //
 // 带 Context* 参数的构造函数实现
@@ -61,10 +62,10 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
     const FusionVector earth = FusionAhrsGetEarthAcceleration( &ahrs );
     // const FusionVector earth = FusionAhrsGetLinearAcceleration( &ahrs );
     //
-    original_sensor_data->qua[ 0 ] = quate.element.x;
-    original_sensor_data->qua[ 1 ] = quate.element.y;
-    original_sensor_data->qua[ 2 ] = quate.element.z;
-    original_sensor_data->qua[ 3 ] = quate.element.w;
+    original_sensor_data->qua[ 0 ] = quate.element.w;
+    original_sensor_data->qua[ 1 ] = quate.element.x;
+    original_sensor_data->qua[ 2 ] = quate.element.y;
+    original_sensor_data->qua[ 3 ] = quate.element.z;
     //
     original_sensor_data->eul[ 0 ] = euler.angle.roll;
     original_sensor_data->eul[ 1 ] = euler.angle.pitch;
@@ -81,11 +82,12 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
         return false;
     }
     //
-    sensor_data->qua[ 0 ] = quate.element.x;
-    sensor_data->qua[ 1 ] = quate.element.y;
-    sensor_data->qua[ 2 ] = quate.element.z;
-    sensor_data->qua[ 3 ] = quate.element.w;
-    //
+    sensor_data->qua[ 0 ] = quate.element.w;
+    sensor_data->qua[ 1 ] = quate.element.x;
+    sensor_data->qua[ 2 ] = quate.element.y;
+    sensor_data->qua[ 3 ] = quate.element.z;
+    sensor_data->qua.normalize();
+    // build
     sensor_data->eul[ 0 ] = euler.angle.roll;
     sensor_data->eul[ 1 ] = euler.angle.pitch;
     sensor_data->eul[ 2 ] = euler.angle.yaw;
@@ -98,12 +100,17 @@ bool xioTechnologiesCalculation::Mul_SolveAnCalculation( EIGEN_SENSOR_DATA* sens
     //
     // // 四元数的构造函数为 w, x, y, z
     Eigen::Quaternionf rotationQuaternion( sensor_data->qua[ 0 ], sensor_data->qua[ 1 ], sensor_data->qua[ 2 ], sensor_data->qua[ 3 ] );
-    // // 归一化四元数（确保四元数是归一化的）
-    // rotationQuaternion.normalize();
+    // 归一化四元数（确保四元数是归一化的）
+    rotationQuaternion.normalize();
+    //
+    sensor_data->std_mag[ 0 ] = sensor_data->mag[ 0 ] / sensor_data->totalMag;
+    sensor_data->std_mag[ 1 ] = sensor_data->mag[ 1 ] / sensor_data->totalMag;
+    sensor_data->std_mag[ 2 ] = sensor_data->mag[ 2 ] / sensor_data->totalMag;
+    // 使用四元数旋转向量
+    Eigen::Vector3f a_std_mag_mid = rotationQuaternion * sensor_data->std_mag;
+    a_std_mag_mid[ 0 ]            = -a_std_mag_mid[ 0 ];
 
-    // // 使用四元数旋转向量
-    // Eigen::Vector3f a_std_mag_mid = rotationQuaternion * sensor_data->std_mag;
-    // a_std_mag_mid[ 0 ]            = -a_std_mag_mid[ 0 ];
+    sensor_data->a_std_mag = a_std_mag_mid;
     // //
     // sensor_data->a_std_mag = fm_deviceToENU( a_std_mag_mid, sensor_data->eul[ 0 ], sensor_data->eul[ 1 ], sensor_data->eul[ 2 ] );
 
@@ -173,6 +180,163 @@ void xioTechnologiesCalculation::ResetInitial()
     //
     mul_previousAcceleration_init = false;
     one_previousAcceleration_init = false;
+}
+//
+void xioTechnologiesCalculation::save_config()
+{
+    std::ofstream  file( "config.json" );
+    nlohmann::json config_json_ = nlohmann::json::object();
+    //
+    config_json_[ "gyroscopeMisalignment" ] = {
+        { "xx", gyroscopeMisalignment.element.xx },  //
+        { "xy", gyroscopeMisalignment.element.xy },  //
+        { "xz", gyroscopeMisalignment.element.xz },  //
+        { "yx", gyroscopeMisalignment.element.yx },  //
+        { "yy", gyroscopeMisalignment.element.yy },  //
+        { "yz", gyroscopeMisalignment.element.yz },  //
+        { "zx", gyroscopeMisalignment.element.zx },  //
+        { "zy", gyroscopeMisalignment.element.zy },  //
+        { "zz", gyroscopeMisalignment.element.zz }   //
+    };
+    config_json_[ "gyroscopeSensitivity" ] = {
+        { "x", gyroscopeSensitivity.axis.x },  //
+        { "y", gyroscopeSensitivity.axis.y },  //
+        { "z", gyroscopeSensitivity.axis.z }   //
+    };
+    config_json_[ "gyroscopeOffset" ] = {
+        { "x", gyroscopeOffset.axis.x },  //
+        { "y", gyroscopeOffset.axis.y },  //
+        { "z", gyroscopeOffset.axis.z }   //
+    };
+    config_json_[ "accelerometerMisalignment" ] = {
+        { "xx", accelerometerMisalignment.element.xx },  //
+        { "xy", accelerometerMisalignment.element.xy },  //
+        { "xz", accelerometerMisalignment.element.xz },  //
+        { "yx", accelerometerMisalignment.element.yx },  //
+        { "yy", accelerometerMisalignment.element.yy },  //
+        { "yz", accelerometerMisalignment.element.yz },  //
+        { "zx", accelerometerMisalignment.element.zx },  //
+        { "zy", accelerometerMisalignment.element.zy },  //
+        { "zz", accelerometerMisalignment.element.zz }   //
+    };
+    config_json_[ "accelerometerSensitivity" ] = {
+        { "x", accelerometerSensitivity.axis.x },  //
+        { "y", accelerometerSensitivity.axis.y },  //
+        { "z", accelerometerSensitivity.axis.z }   //
+    };
+    config_json_[ "accelerometerOffset" ] = {
+        { "x", accelerometerOffset.axis.x },  //
+        { "y", accelerometerOffset.axis.y },  //
+        { "z", accelerometerOffset.axis.z }   //
+    };
+    config_json_[ "softIronMatrix" ] = {
+        { "xx", softIronMatrix.element.xx },  //
+        { "xy", softIronMatrix.element.xy },  //
+        { "xz", softIronMatrix.element.xz },  //
+        { "yx", softIronMatrix.element.yx },  //
+        { "yy", softIronMatrix.element.yy },  //
+        { "yz", softIronMatrix.element.yz },  //
+        { "zx", softIronMatrix.element.zx },  //
+        { "zy", softIronMatrix.element.zy },  //
+        { "zz", softIronMatrix.element.zz }   //
+    };
+    config_json_[ "hardIronOffset" ] = {
+        { "x", hardIronOffset.axis.x },  //
+        { "y", hardIronOffset.axis.y },  //
+        { "z", hardIronOffset.axis.z }   //
+    };
+    config_json_[ "settings" ] = {
+        { "convention", settings.convention },                        //
+        { "gain", settings.gain },                                    //
+        { "gyroscopeRange", settings.gyroscopeRange },                //
+        { "accelerationRejection", settings.accelerationRejection },  //
+        { "magneticRejection", settings.magneticRejection },          //
+        { "recoveryTriggerPeriod", settings.recoveryTriggerPeriod }   //
+    };
+    //
+    if ( file.is_open() )
+    {
+        file << config_json_.dump( 4 );  // 4个空格缩进，美化输出
+        file.close();
+    }
+}
+
+//
+void xioTechnologiesCalculation::read_config()
+{
+    //
+    std::ifstream  file( "config.json" );
+    nlohmann::json config_json_ = nlohmann::json::object();
+    //
+    if ( file.is_open() )
+    {
+        file >> config_json_;  // 直接从文件流解析到json对象
+        //
+        gyroscopeMisalignment.element.xx = config_json_[ "gyroscopeMisalignment" ][ "xx" ];
+        gyroscopeMisalignment.element.xy = config_json_[ "gyroscopeMisalignment" ][ "xy" ];
+        gyroscopeMisalignment.element.xz = config_json_[ "gyroscopeMisalignment" ][ "xz" ];
+        gyroscopeMisalignment.element.yx = config_json_[ "gyroscopeMisalignment" ][ "yx" ];
+        gyroscopeMisalignment.element.yy = config_json_[ "gyroscopeMisalignment" ][ "yy" ];
+        gyroscopeMisalignment.element.yz = config_json_[ "gyroscopeMisalignment" ][ "yz" ];
+        gyroscopeMisalignment.element.zx = config_json_[ "gyroscopeMisalignment" ][ "zx" ];
+        gyroscopeMisalignment.element.zy = config_json_[ "gyroscopeMisalignment" ][ "zy" ];
+        gyroscopeMisalignment.element.zz = config_json_[ "gyroscopeMisalignment" ][ "zz" ];
+        gyroscopeSensitivity.axis.x      = config_json_[ "gyroscopeSensitivity" ][ "x" ];
+        gyroscopeSensitivity.axis.y      = config_json_[ "gyroscopeSensitivity" ][ "y" ];
+        gyroscopeSensitivity.axis.z      = config_json_[ "gyroscopeSensitivity" ][ "z" ];
+        gyroscopeOffset.axis.x           = config_json_[ "gyroscopeOffset" ][ "x" ];
+        gyroscopeOffset.axis.y           = config_json_[ "gyroscopeOffset" ][ "y" ];
+        gyroscopeOffset.axis.z           = config_json_[ "gyroscopeOffset" ][ "z" ];
+        //
+        accelerometerMisalignment.element.xx = config_json_[ "accelerometerMisalignment" ][ "xx" ];
+        accelerometerMisalignment.element.xy = config_json_[ "accelerometerMisalignment" ][ "xy" ];
+        accelerometerMisalignment.element.xz = config_json_[ "accelerometerMisalignment" ][ "xz" ];
+        accelerometerMisalignment.element.yx = config_json_[ "accelerometerMisalignment" ][ "yx" ];
+        accelerometerMisalignment.element.yy = config_json_[ "accelerometerMisalignment" ][ "yy" ];
+        accelerometerMisalignment.element.yz = config_json_[ "accelerometerMisalignment" ][ "yz" ];
+        accelerometerMisalignment.element.zx = config_json_[ "accelerometerMisalignment" ][ "zx" ];
+        accelerometerMisalignment.element.zy = config_json_[ "accelerometerMisalignment" ][ "zy" ];
+        accelerometerMisalignment.element.zz = config_json_[ "accelerometerMisalignment" ][ "zz" ];
+        accelerometerSensitivity.axis.x      = config_json_[ "accelerometerSensitivity" ][ "x" ];
+        accelerometerSensitivity.axis.y      = config_json_[ "accelerometerSensitivity" ][ "y" ];
+        accelerometerSensitivity.axis.z      = config_json_[ "accelerometerSensitivity" ][ "z" ];
+        accelerometerOffset.axis.x           = config_json_[ "accelerometerOffset" ][ "x" ];
+        accelerometerOffset.axis.y           = config_json_[ "accelerometerOffset" ][ "y" ];
+        accelerometerOffset.axis.z           = config_json_[ "accelerometerOffset" ][ "z" ];
+        //
+        softIronMatrix.element.xx = config_json_[ "softIronMatrix" ][ "xx" ];
+        softIronMatrix.element.xy = config_json_[ "softIronMatrix" ][ "xy" ];
+        softIronMatrix.element.xz = config_json_[ "softIronMatrix" ][ "xz" ];
+        softIronMatrix.element.yx = config_json_[ "softIronMatrix" ][ "yx" ];
+        softIronMatrix.element.yy = config_json_[ "softIronMatrix" ][ "yy" ];
+        softIronMatrix.element.yz = config_json_[ "softIronMatrix" ][ "yz" ];
+        softIronMatrix.element.zx = config_json_[ "softIronMatrix" ][ "zx" ];
+        softIronMatrix.element.zy = config_json_[ "softIronMatrix" ][ "zy" ];
+        softIronMatrix.element.zz = config_json_[ "softIronMatrix" ][ "zz" ];
+        hardIronOffset.axis.x     = config_json_[ "hardIronOffset" ][ "x" ];
+        hardIronOffset.axis.y     = config_json_[ "hardIronOffset" ][ "y" ];
+        hardIronOffset.axis.z     = config_json_[ "hardIronOffset" ][ "z" ];
+        //
+        if ( config_json_[ "settings" ][ "convention" ] == 0 )
+        {
+            settings.convention = FusionConventionNwu;
+        }
+        else if ( config_json_[ "settings" ][ "convention" ] == 1 )
+        {
+            settings.convention = FusionConventionEnu;
+        }
+        else if ( config_json_[ "settings" ][ "convention" ] == 2 )
+        {
+            settings.convention = FusionConventionNed;
+        }
+        settings.gain                  = config_json_[ "settings" ][ "gain" ];
+        settings.gyroscopeRange        = config_json_[ "settings" ][ "gyroscopeRange" ];
+        settings.accelerationRejection = config_json_[ "settings" ][ "accelerationRejection" ];
+        settings.magneticRejection     = config_json_[ "settings" ][ "magneticRejection" ];
+        settings.recoveryTriggerPeriod = config_json_[ "settings" ][ "recoveryTriggerPeriod" ];
+        //
+        file.close();
+    }
 }
 //
 void xioTechnologiesCalculation::ResetInitFusion()

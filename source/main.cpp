@@ -55,6 +55,9 @@ int main()
 {
     server.setPort( port );
     server.start();
+    // 
+    ahrs_calculation_.read_config();
+    // 
     server.str_fusion_config = ahrs_calculation_.GetConfigString();
     std::this_thread::sleep_for( std::chrono::seconds( 3 ) );
     //
