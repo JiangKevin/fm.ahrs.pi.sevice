@@ -1,2 +1,5 @@
-/bin
+/bin/ahrs_sevice
 /build
+/bin/*.csv
+/bin/*.mat
+/bin/*.db3
