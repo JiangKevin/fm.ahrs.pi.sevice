@@ -180,6 +180,39 @@ static void init_sensor( MMC56x3& sensor_mmc, ICM42670& sensor_imu )
     // Wait IMU to start
     std::this_thread::sleep_for( std::chrono::milliseconds( 1000 ) );
 }
+static bool get_calibration_data_for_imu( MMC56x3& sensor_mmc, ICM42670& sensor_imu, std::ofstream& xsens_acc_file, std::ofstream& xsens_gyro_file, EIGEN_SENSOR_DATA& sensor_data )
+{
+    std::string acc_line  = "    ";
+    std::string gyro_line = "    ";
+    //
+    int64_t time = getMicrosecondTimestamp();
+    // TDK42607
+    inv_imu_sensor_event_t imu_event;
+    // Get last event
+    sensor_imu.getDataFromRegisters( imu_event );
+    //
+    acc_line += std::to_string( time ) + "    ";
+    acc_line += std::to_string( imu_event.accel[ 0 ] ) + "    ";
+    acc_line += std::to_string( imu_event.accel[ 1 ] ) + "    ";
+    acc_line += std::to_string( imu_event.accel[ 2 ] );
+    xsens_acc_file << acc_line << std::endl;
+    //
+    gyro_line += std::to_string( time ) + "    ";
+    gyro_line += std::to_string( imu_event.gyro[ 0 ] ) + "    ";
+    gyro_line += std::to_string( imu_event.gyro[ 1 ] ) + "    ";
+    gyro_line += std::to_string( imu_event.gyro[ 2 ] );
+    xsens_gyro_file << gyro_line << std::endl;
+    //
+    sensor_data.time     = time;
+    sensor_data.acc[ 0 ] = imu_event.accel[ 0 ] / 2048.0;
+    sensor_data.acc[ 1 ] = imu_event.accel[ 1 ] / 2048.0;
+    sensor_data.acc[ 2 ] = imu_event.accel[ 2 ] / 2048.0;
+    sensor_data.gyr[ 0 ] = imu_event.gyro[ 0 ] / 16.4;
+    sensor_data.gyr[ 1 ] = imu_event.gyro[ 1 ] / 16.4;
+    sensor_data.gyr[ 2 ] = imu_event.gyro[ 2 ] / 16.4;
+    //
+    return true;
+}
 //
 static bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, EIGEN_SENSOR_DATA& sensor_data, EIGEN_SENSOR_DATA& original_sensor_data )
 {

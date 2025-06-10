@@ -27,6 +27,10 @@ int               csv_index = 0;
 //
 MMC56x3  sensor_mmc_;
 ICM42670 sensor_imu_;
+//
+std::ofstream xsens_acc_file_( "xsens_acc.mat", std::ios::app );
+std::ofstream xsens_gyro_file_( "xsens_gyro.mat", std::ios::app );
+
 // 信号处理函数
 static void signalHandler_for_gloab( int signum )
 {
@@ -55,9 +59,9 @@ int main()
 {
     server.setPort( port );
     server.start();
-    // 
+    //
     ahrs_calculation_.read_config();
-    // 
+    //
     server.str_fusion_config = ahrs_calculation_.GetConfigString();
     std::this_thread::sleep_for( std::chrono::seconds( 3 ) );
     //
@@ -224,6 +228,19 @@ int main()
             read_csv_row_index = 0;
             //
             read_csv_doc_.Load( "data.csv" );
+        }
+        else if ( startsWith( server.commond_, "CalibrationData" ) )
+        {
+            sensor_data_.ToZero();
+            bool ret = get_calibration_data_for_imu( sensor_mmc_, sensor_imu_, xsens_acc_file_, xsens_gyro_file_, sensor_data_ );
+            if ( ret )
+            {
+                std::string command = "AfterCalculation:|";
+                command += sensor_data_.to_json_string();
+                server.handleSend( command );
+            }
+            // Run @ ODR 100Hz:10
+            std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
         }
         else if ( startsWith( server.commond_, "Clear" ) )
         {
