@@ -231,7 +231,6 @@ int main()
         }
         else if ( startsWith( server.commond_, "CalibrationData" ) )
         {
-            sensor_data_.ToZero();
             bool ret = get_calibration_data_for_imu( sensor_mmc_, sensor_imu_, xsens_acc_file_, xsens_gyro_file_, sensor_data_ );
             if ( ret )
             {
@@ -240,7 +239,7 @@ int main()
                 server.handleSend( command );
             }
             // Run @ ODR 100Hz:10
-            std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
+            std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
         }
         else if ( startsWith( server.commond_, "Clear" ) )
         {
