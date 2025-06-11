@@ -239,7 +239,7 @@ int main()
                 server.handleSend( command );
             }
             // Run @ ODR 100Hz:10
-            std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
+            std::this_thread::sleep_for( std::chrono::milliseconds( 8 ) );
         }
         else if ( startsWith( server.commond_, "Clear" ) )
         {
